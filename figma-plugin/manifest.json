@@ -7,7 +7,7 @@
   "editorType": ["figma"],
   "networkAccess": {
     "allowedDomains": [
-      "https://my-content-system.vercel.app"
+      "https://my-content-system-o9l2.vercel.app"
     ],
     "devAllowedDomains": ["http://localhost:3000"]
   }
