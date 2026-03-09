@@ -1,0 +1,14 @@
+{
+  "name": "Content Generator",
+  "id": "content-generator-workable-001",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://my-content-system.vercel.app"
+    ],
+    "devAllowedDomains": ["http://localhost:3000"]
+  }
+}
