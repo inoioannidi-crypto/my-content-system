@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workable Content Design System</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-w: 248px;
+      --topbar-h: 56px;
+      --bg: #ffffff;
+      --bg-subtle: #f7f7f7;
+      --bg-hover: #efefef;
+      --border: #e5e5e5;
+      --text: #111111;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+      --accent: #0d99ff;
+      --accent-hover: #0880d4;
+      --accent-light: #e8f4ff;
+      --green: #1a9e5c;
+      --green-bg: #e8f7ef;
+      --red: #d93025;
+      --red-bg: #fce8e6;
+      --amber: #b06b00;
+      --amber-bg: #fef3e2;
+      --radius: 6px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--topbar-h);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px 0 24px;
+      gap: 16px;
+      z-index: 200;
+    }
+
+    .brand {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .brand span { color: var(--accent); }
+
+    .topbar-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 380px;
+      position: relative;
+    }
+
+    .search-ico {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      display: flex;
+    }
+
+    #search {
+      width: 100%;
+      padding: 7px 12px 7px 30px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg-subtle);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    #search:focus { border-color: var(--accent); background: var(--bg); }
+    #search::placeholder { color: var(--text-muted); }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .version-tag {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .api-pill {
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      padding: 3px 8px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: border-color 0.15s;
+    }
+
+    .api-pill:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      position: fixed;
+      top: var(--topbar-h);
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 16px 0 32px;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .nav-group { margin-bottom: 2px; }
+
+    .nav-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 10px 20px 3px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 5px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.1s, background 0.1s;
+      position: relative;
+      border-left: 2px solid transparent;
+    }
+
+    .nav-link:hover { color: var(--text); background: var(--bg-hover); }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--accent-light);
+      font-weight: 500;
+      border-left-color: var(--accent);
+    }
+
+    .nav-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 20px;
+    }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 52px 72px 100px;
+      max-width: calc(var(--sidebar-w) + 780px);
+    }
+
+    /* ── Section ── */
+    .section { margin-bottom: 72px; }
+
+    .section-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* ── Sub-section ── */
+    .subsection { margin-bottom: 36px; }
+
+    .subsection-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: var(--border); margin: 60px 0; }
+
+    /* ── Brand Voice ── */
+    .trait-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .trait-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      transition: border-color 0.15s;
+    }
+
+    .trait-card:hover { border-color: var(--accent); }
+
+    .trait-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .trait-vs {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 2px 0;
+    }
+
+    .trait-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .value-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .value-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .value-badge {
+      flex-shrink: 0;
+      width: 64px;
+      padding: 3px 0;
+      text-align: center;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 20px;
+      margin-top: 1px;
+    }
+
+    .value-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .value-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Writing Rules ── */
+    .rule-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .rule-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rule-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .rule-title { font-size: 14px; font-weight: 600; color: var(--text); }
+
+    .rule-body { padding: 14px 16px; }
+
+    .rule-points { list-style: none; margin-bottom: 12px; }
+
+    .rule-points li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 3px 0 3px 16px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .rule-points li::before { content: '–'; position: absolute; left: 0; color: var(--text-muted); }
+
+    .rule-test {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 9px 12px;
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      font-size: 12px;
+      color: var(--accent);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .rule-test-label { font-weight: 700; flex-shrink: 0; }
+
+    /* ── Do / Don't ── */
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .do-card, .dont-card {
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .do-card {
+      background: var(--green-bg);
+      border: 1px solid #b7e4cf;
+    }
+
+    .dont-card {
+      background: var(--red-bg);
+      border: 1px solid #f5c0bb;
+    }
+
+    .do-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--green);
+      margin-bottom: 5px;
+    }
+
+    .dont-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--red);
+      margin-bottom: 5px;
+    }
+
+    .do-text { color: #1a4d35; }
+    .dont-text { color: #7a1a13; }
+
+    /* ── Tone table ── */
+    .tone-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .tone-table th {
+      text-align: left;
+      padding: 9px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tone-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+    }
+
+    .tone-table tr:last-child td { border-bottom: none; }
+    .tone-table tr:hover td { background: var(--bg-subtle); }
+
+    .tone-ctx { font-weight: 500; color: var(--text); white-space: nowrap; }
+    .tone-val { color: var(--text-secondary); }
+
+    .tone-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    /* ── Grammar lists ── */
+    .g-list { list-style: none; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+    .g-list li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .g-list li:last-child { border-bottom: none; }
+    .g-list li:hover { background: var(--bg-subtle); }
+
+    .g-icon { flex-shrink: 0; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Word choice pills ── */
+    .word-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .word-row:last-child { border-bottom: none; }
+    .word-row:hover { background: var(--bg-subtle); }
+
+    .word-do {
+      font-weight: 600;
+      color: var(--green);
+      background: var(--green-bg);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .word-dont {
+      font-weight: 600;
+      color: var(--red);
+      background: var(--red-bg);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-decoration: line-through;
+    }
+
+    .word-arrow { color: var(--text-muted); font-size: 12px; }
+
+    .word-note { color: var(--text-secondary); font-size: 12px; }
+
+    /* ── Content type cards ── */
+    .ct-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ct-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      transition: border-color 0.15s;
+    }
+
+    .ct-card:hover { border-color: var(--accent); }
+
+    .ct-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .ct-rules { list-style: none; }
+
+    .ct-rules li {
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 2px 0 2px 13px;
+      position: relative;
+      line-height: 1.4;
+    }
+
+    .ct-rules li::before { content: '·'; position: absolute; left: 3px; color: var(--text-muted); font-size: 14px; }
+
+    /* ── Integration ── */
+    .code-block {
+      background: #1a1a2e;
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    .code-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .step-list { list-style: none; counter-reset: steps; }
+
+    .step-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .step-list li:last-child { border-bottom: none; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .step-num::before { content: counter(steps); }
+
+    /* ── Search states ── */
+    .search-notice {
+      padding: 8px 12px;
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ── Inline code ── */
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Workable <span>Content</span></div>
+  <div class="topbar-sep"></div>
+  <div class="search-wrap">
+    <span class="search-ico">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    </span>
+    <input id="search" type="text" placeholder="Search guidelines…" autocomplete="off" />
+  </div>
+  <div class="topbar-right">
+    <span class="version-tag">v1.0</span>
+    <a class="api-pill" href="https://my-content-system-o9l2.vercel.app/api/guidelines" target="_blank">GET /api/guidelines</a>
+  </div>
+</div>
+
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <span class="nav-label">Voice</span>
+      <a class="nav-link" href="#brand-voice">Brand voice</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Rules</span>
+      <a class="nav-link" href="#writing-rules">7 writing rules</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Tone</span>
+      <a class="nav-link" href="#tone-by-context">Tone by context</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Grammar & Style</span>
+      <a class="nav-link" href="#language">Language</a>
+      <a class="nav-link" href="#capitalization">Capitalization</a>
+      <a class="nav-link" href="#numbers">Numbers & symbols</a>
+      <a class="nav-link" href="#punctuation">Punctuation</a>
+      <a class="nav-link" href="#dates">Dates & times</a>
+      <a class="nav-link" href="#word-choices">Word choices</a>
+      <a class="nav-link" href="#bullet-points">Bullet points</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Content types</span>
+      <a class="nav-link" href="#content-types">All content types</a>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-group">
+      <span class="nav-label">Integrate</span>
+      <a class="nav-link" href="#api">API</a>
+      <a class="nav-link" href="#cursor">Cursor</a>
+      <a class="nav-link" href="#figma">Figma plugin</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div id="search-notice" class="search-notice"></div>
+    <div id="no-results" class="no-results">No results found for your search.</div>
+    <div id="content"><div class="loading">Loading guidelines…</div></div>
+  </main>
+
+</div>
+
+<script>
+  var API_URL = 'https://my-content-system-o9l2.vercel.app/api/guidelines';
+
+  /* ── Tiny helpers ── */
+  function e(tag, cls) {
+    var el = document.createElement(tag);
+    if (cls) el.className = cls;
+    return el;
+  }
+
+  function h(el, html) { el.innerHTML = html; return el; }
+
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function sec(id, eyebrow, title, desc) {
+    var s = e('div', 'section');
+    s.id = id;
+    if (eyebrow) s.appendChild(h(e('div', 'section-eyebrow'), eyebrow));
+    s.appendChild(h(e('h2', 'section-title'), title));
+    if (desc) s.appendChild(h(e('p', 'section-desc'), desc));
+    return s;
+  }
+
+  function sub(title) {
+    var s = e('div', 'subsection');
+    s.appendChild(h(e('div', 'subsection-title'), title));
+    return s;
+  }
+
+  function gList(items) {
+    var ul = e('ul', 'g-list');
+    items.forEach(function(item) {
+      var li = e('li');
+      li.innerHTML = '<svg class="g-icon" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg><span>' + esc(item) + '</span>';
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  function divider() { return e('div', 'divider'); }
+
+  /* ── Tone dot colors ── */
+  var toneDots = {
+    'Product UI & Microcopy': '#0d99ff',
+    'Marketing Copy': '#9b59b6',
+    'Help Center & Support': '#1a9e5c',
+    'Error Messages': '#d93025',
+    'Emails & Notifications': '#e67e22',
+    'Onboarding / Empty States': '#2ecc71',
+    'Flash Messages': '#7f8c8d',
+  };
+
+  /* ── Do / Don't examples per rule ── */
+  var ruleExamples = [
+    { dont: '"In order to complete your profile, please make sure to fill in all required fields before proceeding."', do: '"Fill in all required fields to complete your profile."' },
+    { dont: 'Title: "Start review cycle" → Button: "Confirm"', do: 'Title: "Start review cycle" → Button: "Start review cycle"' },
+    { dont: '"Leverage our AI-powered auto-sourcing to optimise your talent pipeline."', do: '"Find candidates faster with Workable\'s built-in sourcing tools."' },
+    { dont: '"It is recommended that the user reads all instructions carefully prior to submitting."', do: '"Read the instructions before you submit."' },
+    { dont: '"Oops! You didn\'t attach a resume. Please go back and try again."', do: '"Attach a resume to continue."' },
+    { dont: '"The application has been submitted by the system."', do: '"Workable submitted your application."' },
+    { dont: '"Great news! Your job post is live!" (on an error confirmation modal)', do: '"Your job post is live." — warmth reserved for onboarding success screens' },
+  ];
+
+  /* ── Render ── */
+  function render(data) {
+    var container = document.getElementById('content');
+    container.innerHTML = '';
+
+    // ─── Brand Voice ───────────────────────────────────────────
+    var vs = sec('brand-voice', 'Voice', 'Brand voice', 'The core traits and writing values that shape every piece of Workable content.');
+
+    var coreS = sub('Core voice');
+    var grid = e('div', 'trait-grid');
+    data.brandVoice.core.forEach(function(t) {
+      var parts = t.trait.split(' yet ');
+      var card = e('div', 'trait-card');
+      card.innerHTML =
+        '<div class="trait-name">' + esc(parts[0]) + '</div>' +
+        (parts[1] ? '<div class="trait-vs">yet</div><div class="trait-name">' + esc(parts[1]) + '</div>' : '') +
+        '<div class="trait-desc" style="margin-top:8px">' + esc(t.description) + '</div>';
+      grid.appendChild(card);
+    });
+    coreS.appendChild(grid);
+    vs.appendChild(coreS);
+
+    var valS = sub('Writing values');
+    var vl = e('div', 'value-list');
+    data.brandVoice.values.forEach(function(v) {
+      var item = e('div', 'value-item');
+      item.innerHTML =
+        '<span class="value-badge">' + esc(v.name) + '</span>' +
+        '<div><div class="value-name">' + esc(v.name) + '</div><div class="value-desc">' + esc(v.description) + '</div></div>';
+      vl.appendChild(item);
+    });
+    valS.appendChild(vl);
+    vs.appendChild(valS);
+    container.appendChild(vs);
+    container.appendChild(divider());
+
+    // ─── Writing Rules ─────────────────────────────────────────
+    var rs = sec('writing-rules', 'Rules', '7 writing rules', 'Apply these to every piece of copy you write or review.');
+
+    data.writingRules.forEach(function(rule, i) {
+      var card = e('div', 'rule-card');
+
+      var hdr = e('div', 'rule-header');
+      hdr.innerHTML = '<span class="rule-num">' + rule.number + '</span><span class="rule-title">' + esc(rule.title) + '</span>';
+      card.appendChild(hdr);
+
+      var body = e('div', 'rule-body');
+
+      var ul = e('ul', 'rule-points');
+      rule.points.forEach(function(p) { ul.appendChild(h(e('li'), esc(p))); });
+      body.appendChild(ul);
+
+      var test = e('div', 'rule-test');
+      test.innerHTML = '<span class="rule-test-label">Test:</span><span>' + esc(rule.test) + '</span>';
+      body.appendChild(test);
+
+      if (ruleExamples[i]) {
+        var dd = e('div', 'do-dont');
+        dd.innerHTML =
+          '<div class="dont-card"><div class="dont-label">✕ Don\'t</div><div class="dont-text">' + esc(ruleExamples[i].dont) + '</div></div>' +
+          '<div class="do-card"><div class="do-label">✓ Do</div><div class="do-text">' + esc(ruleExamples[i].do) + '</div></div>';
+        body.appendChild(dd);
+      }
+
+      card.appendChild(body);
+      rs.appendChild(card);
+    });
+
+    container.appendChild(rs);
+    container.appendChild(divider());
+
+    // ─── Tone by Context ───────────────────────────────────────
+    var ts = sec('tone-by-context', 'Tone', 'Tone by context', 'Match your writing style to where and how it will be read.');
+
+    var tbl = e('table', 'tone-table');
+    tbl.innerHTML = '<thead><tr><th>Context</th><th>Tone</th></tr></thead>';
+    var tbody = e('tbody');
+    data.toneByContext.forEach(function(row) {
+      var color = toneDots[row.context] || '#aaa';
+      var tr = e('tr');
+      tr.innerHTML =
+        '<td class="tone-ctx"><span class="tone-dot" style="background:' + color + '"></span>' + esc(row.context) + '</td>' +
+        '<td class="tone-val">' + esc(row.tone) + '</td>';
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    ts.appendChild(tbl);
+    container.appendChild(ts);
+    container.appendChild(divider());
+
+    // ─── Grammar sections ──────────────────────────────────────
+    var grammarDefs = [
+      { id: 'language',       key: 'language',          eyebrow: 'Grammar',  title: 'Language',          desc: 'Regional spellings, product terminology, and consistent naming.' },
+      { id: 'capitalization', key: 'capitalization',    eyebrow: 'Grammar',  title: 'Capitalization',    desc: 'When to capitalize and when not to.' },
+      { id: 'numbers',        key: 'numbersAndSymbols', eyebrow: 'Grammar',  title: 'Numbers & symbols', desc: 'Formatting numbers, currencies, and percentages.' },
+      { id: 'punctuation',    key: 'punctuation',       eyebrow: 'Grammar',  title: 'Punctuation',       desc: 'Rules for full stops, dashes, ampersands, and more.' },
+      { id: 'dates',          key: 'datesAndTimes',     eyebrow: 'Grammar',  title: 'Dates & times',     desc: 'Standard formats for dates and times across the product.' },
+      { id: 'bullet-points',  key: 'bulletPoints',      eyebrow: 'Grammar',  title: 'Bullet points',     desc: 'How to structure lists consistently.' },
+    ];
+
+    grammarDefs.forEach(function(gd, idx) {
+      var s = sec(gd.id, gd.eyebrow, gd.title, gd.desc);
+      s.appendChild(gList(data.grammar[gd.key]));
+      container.appendChild(s);
+      if (idx < grammarDefs.length - 1) container.appendChild(divider());
+    });
+
+    // ─── Word Choices (visual) ─────────────────────────────────
+    container.appendChild(divider());
+    var wcs = sec('word-choices', 'Grammar', 'Word choices', 'Preferred terms and words to avoid across all surfaces.');
+
+    var wordData = [
+      { do: 'your', dont: 'my', note: 'e.g. "Your profile", not "My profile"' },
+      { do: 'view', dont: 'see', note: 'for instructions' },
+      { do: 'select', dont: 'click', note: 'device-agnostic' },
+      { do: 'choose', dont: 'pick', note: '"choose" for decisions, "select" for UI controls' },
+      { do: 'edit', dont: 'change', note: '"edit" = modify existing; "change" = switch options' },
+      { do: 'For example', dont: 'etc.', note: 'list up to 3 explicit examples instead' },
+      { do: 'e.g.', dont: 'etc.', note: 'only in tight UI spaces, lowercase, no colon' },
+      { do: 'resume', dont: 'CV', note: 'US English standard' },
+    ];
+
+    var wordBox = e('div');
+    wordBox.style.cssText = 'border:1px solid var(--border);border-radius:var(--radius);overflow:hidden';
+    wordData.forEach(function(w) {
+      var row = e('div', 'word-row');
+      row.innerHTML =
+        '<span class="word-dont">' + esc(w.dont) + '</span>' +
+        '<span class="word-arrow">→</span>' +
+        '<span class="word-do">' + esc(w.do) + '</span>' +
+        '<span class="word-note">' + esc(w.note) + '</span>';
+      wordBox.appendChild(row);
+    });
+    wcs.appendChild(wordBox);
+    container.appendChild(wcs);
+    container.appendChild(divider());
+
+    // ─── Content Types ─────────────────────────────────────────
+    var cts = sec('content-types', 'Content types', 'Content types', 'Quick-reference rules for each type of UI copy.');
+
+    var ctGrid = e('div', 'ct-grid');
+    data.contentTypes.forEach(function(ct) {
+      var card = e('div', 'ct-card');
+      var name = h(e('div', 'ct-name'), esc(ct.type));
+      var ul = e('ul', 'ct-rules');
+      ct.rules.forEach(function(r) { ul.appendChild(h(e('li'), esc(r))); });
+      card.appendChild(name);
+      card.appendChild(ul);
+      ctGrid.appendChild(card);
+    });
+
+    cts.appendChild(ctGrid);
+    container.appendChild(cts);
+    container.appendChild(divider());
+
+    // ─── API ───────────────────────────────────────────────────
+    var apis = sec('api', 'Integrate', 'API', 'The guidelines are available as a JSON endpoint. Use it to power any tool — plugins, linters, AI prompts, or custom scripts.');
+
+    var el1 = h(e('div', 'code-label'), 'Endpoint');
+    var el2 = h(e('div', 'code-block'), '<span style="color:#7dd3fc">GET</span> ' + esc(API_URL));
+    var el3 = h(e('p'), 'The response returns structured JSON with brand voice, writing rules, tone guidelines, grammar rules, and content types. No authentication required.');
+    el3.style.cssText = 'font-size:13px;color:var(--text-secondary);margin:14px 0 16px';
+
+    var el4 = h(e('div', 'code-label'), 'Example: fetch in JavaScript');
+    var el5 = h(e('div', 'code-block'),
+      '<span style="color:#93c5fd">fetch</span>(<span style="color:#86efac">\'' + esc(API_URL) + '\'</span>)\n' +
+      '  .<span style="color:#93c5fd">then</span>(r => r.<span style="color:#93c5fd">json</span>())\n' +
+      '  .<span style="color:#93c5fd">then</span>(guidelines => console.<span style="color:#93c5fd">log</span>(guidelines));'
+    );
+
+    apis.appendChild(el1);
+    apis.appendChild(el2);
+    apis.appendChild(el3);
+    apis.appendChild(el4);
+    apis.appendChild(el5);
+    container.appendChild(apis);
+    container.appendChild(divider());
+
+    // ─── Cursor ────────────────────────────────────────────────
+    var curs = sec('cursor', 'Integrate', 'Cursor', 'Add the Workable content guidelines as permanent AI context in Cursor, so every AI-assisted write follows the rules automatically.');
+
+    var ol1 = e('ol', 'step-list');
+    [
+      'Open Cursor and go to <strong>Settings → Rules for AI</strong> (or press <code>Cmd + ,</code> and search "Rules for AI")',
+      'Add this line: <code>Always follow the Workable content guidelines available at ' + esc(API_URL) + '</code>',
+      'Cursor will fetch the guidelines and apply them to all AI-assisted writing in your project',
+      'Alternatively, add a <code>.cursorrules</code> file to your project root — the file is included in this repo at the root level',
+    ].forEach(function(step) {
+      var li = e('li');
+      li.innerHTML = '<span class="step-num"></span><span>' + step + '</span>';
+      ol1.appendChild(li);
+    });
+
+    var optLabel = h(e('div', 'code-label'), '.cursorrules file (alternative)');
+    optLabel.style.marginTop = '20px';
+    var optCode = h(e('div', 'code-block'),
+      '<span style="color:#7dd3fc"># .cursorrules</span>\n' +
+      'You are writing UI copy for Workable. Always follow the content guidelines at:\n' +
+      esc(API_URL) + '\n\n' +
+      'Key rules:\n' +
+      '- Lead with what matters most. Cut filler.\n' +
+      '- Use active voice. "Workable" or "we", never "the system".\n' +
+      '- Never blame the user. Lead with the fix.\n' +
+      '- Use "select" not "click". Use "your" not "my".\n' +
+      '- Match tone to context: warmth for onboarding, clarity-only for errors.\n' +
+      '- US English. Sentence case for all UI. Oxford comma.'
+    );
+
+    curs.appendChild(ol1);
+    curs.appendChild(optLabel);
+    curs.appendChild(optCode);
+    container.appendChild(curs);
+    container.appendChild(divider());
+
+    // ─── Figma plugin ──────────────────────────────────────────
+    var figs = sec('figma', 'Integrate', 'Figma plugin', 'The Content Generator plugin is available for Figma. It generates brand-voice copy and checks tone directly in your design files.');
+
+    var figSteps = e('ol', 'step-list');
+    [
+      'Download or locate the <code>figma-plugin</code> folder from this repo',
+      'Open the Figma desktop app and open any file',
+      'Go to <strong>Main Menu → Plugins → Development → Import plugin from manifest…</strong>',
+      'Select <code>manifest.json</code> from the plugin folder',
+      'The plugin appears under <strong>Plugins → Development → Content Generator</strong>',
+    ].forEach(function(step) {
+      var li = e('li');
+      li.innerHTML = '<span class="step-num"></span><span>' + step + '</span>';
+      figSteps.appendChild(li);
+    });
+
+    figs.appendChild(figSteps);
+    container.appendChild(figs);
+
+    setupScrollSpy();
+  }
+
+  /* ── Search ── */
+  document.getElementById('search').addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    var notice = document.getElementById('search-notice');
+    var noRes = document.getElementById('no-results');
+
+    if (!q) {
+      notice.style.display = 'none';
+      noRes.style.display = 'none';
+      document.querySelectorAll('.section').forEach(function(s) { s.style.display = ''; });
+      document.querySelectorAll('.divider').forEach(function(d) { d.style.display = ''; });
+      return;
+    }
+
+    var found = 0;
+    document.querySelectorAll('.section').forEach(function(s) {
+      if (s.textContent.toLowerCase().includes(q)) { s.style.display = ''; found++; }
+      else s.style.display = 'none';
+    });
+    document.querySelectorAll('.divider').forEach(function(d) { d.style.display = 'none'; });
+
+    if (found === 0) {
+      noRes.style.display = 'block';
+      notice.style.display = 'none';
+    } else {
+      noRes.style.display = 'none';
+      notice.textContent = found + ' section' + (found !== 1 ? 's' : '') + ' match "' + this.value.trim() + '"';
+      notice.style.display = 'block';
+    }
+  });
+
+  /* ── Scroll spy ── */
+  function setupScrollSpy() {
+    var links = document.querySelectorAll('.nav-link');
+    var sections = Array.from(document.querySelectorAll('.section[id]'));
+
+    window.addEventListener('scroll', function() {
+      var fromTop = window.scrollY + 80;
+      var current = null;
+      sections.forEach(function(s) { if (s.offsetTop <= fromTop) current = s.id; });
+      links.forEach(function(l) {
+        l.classList.toggle('active', current !== null && l.getAttribute('href') === '#' + current);
+      });
+    }, { passive: true });
+  }
+
+  /* ── Load ── */
+  fetch(API_URL)
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(render)
+    .catch(function() {
+      document.getElementById('content').innerHTML =
+        '<div class="loading">Failed to load guidelines. Make sure the backend is deployed and running.</div>';
+    });
+</script>
+
+</body>
+</html>
