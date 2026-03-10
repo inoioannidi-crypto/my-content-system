@@ -8,7 +8,7 @@ export default defineConfig({
   title: 'Workable Content System',
 
   // Fill in your Sanity project ID after creating a project at sanity.io
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'REPLACE_WITH_YOUR_PROJECT_ID',
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'cvggucp0',
   dataset: process.env.SANITY_STUDIO_DATASET || 'production',
 
   plugins: [
