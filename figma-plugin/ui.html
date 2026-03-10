@@ -472,8 +472,6 @@
   </div>
 
   <script>
-    const BACKEND_URL = 'https://my-content-system-o9l2.vercel.app';
-
     // ── State ──
     let selectedText = null;
     let hasSelection = false;
@@ -514,6 +512,26 @@
       if (msg.type === 'apply-error') {
         alert(msg.message);
       }
+
+      if (msg.type === 'generate-result') {
+        setGenerateLoading(false);
+        renderGenerateResults(msg.copies);
+      }
+
+      if (msg.type === 'generate-error') {
+        setGenerateLoading(false);
+        showError('gen-error', msg.error);
+      }
+
+      if (msg.type === 'tone-check-result') {
+        setToneLoading(false);
+        renderToneResults(msg.data);
+      }
+
+      if (msg.type === 'tone-check-error') {
+        setToneLoading(false);
+        showError('tc-error', msg.error);
+      }
     };
 
     function updateSelectionBanners() {
@@ -542,7 +560,7 @@
     }
 
     // ── Generate ──
-    document.getElementById('gen-btn').addEventListener('click', async function() {
+    document.getElementById('gen-btn').addEventListener('click', function() {
       var contentType = document.getElementById('gen-type').value;
       var description = document.getElementById('gen-description').value.trim();
       var context = document.getElementById('gen-context').value.trim();
@@ -560,25 +578,12 @@
       setGenerateLoading(true);
       document.getElementById('gen-results').style.display = 'none';
 
-      try {
-        var response = await fetch(BACKEND_URL + '/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contentType: contentType, description: description, context: context || undefined }),
-        });
-
-        if (!response.ok) {
-          var err = await response.json().catch(function() { return {}; });
-          throw new Error(err.error || 'Request failed (' + response.status + ')');
-        }
-
-        var data = await response.json();
-        renderGenerateResults(data.copies);
-      } catch (err) {
-        showError('gen-error', err.message || 'Something went wrong. Try again.');
-      } finally {
-        setGenerateLoading(false);
-      }
+      parent.postMessage({ pluginMessage: {
+        type: 'generate',
+        contentType: contentType,
+        description: description,
+        context: context || undefined
+      }}, '*');
     });
 
     function renderGenerateResults(copies) {
@@ -640,7 +645,7 @@
     }
 
     // ── Tone check ──
-    document.getElementById('tc-btn').addEventListener('click', async function() {
+    document.getElementById('tc-btn').addEventListener('click', function() {
       var text = document.getElementById('tc-text').value.trim();
       var contentType = document.getElementById('tc-type').value;
 
@@ -653,25 +658,11 @@
       setToneLoading(true);
       document.getElementById('tc-results').style.display = 'none';
 
-      try {
-        var response = await fetch(BACKEND_URL + '/api/tone-check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text, contentType: contentType || undefined }),
-        });
-
-        if (!response.ok) {
-          var err = await response.json().catch(function() { return {}; });
-          throw new Error(err.error || 'Request failed (' + response.status + ')');
-        }
-
-        var data = await response.json();
-        renderToneResults(data);
-      } catch (err) {
-        showError('tc-error', err.message || 'Something went wrong. Try again.');
-      } finally {
-        setToneLoading(false);
-      }
+      parent.postMessage({ pluginMessage: {
+        type: 'tone-check',
+        text: text,
+        contentType: contentType || undefined
+      }}, '*');
     });
 
     function renderToneResults(data) {

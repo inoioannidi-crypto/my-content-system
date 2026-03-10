@@ -41,4 +41,55 @@ figma.ui.onmessage = async function(msg) {
   if (msg.type === 'close') {
     figma.closePlugin();
   }
+
+  if (msg.type === 'generate') {
+    fetch('https://my-content-system-o9l2.vercel.app/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contentType: msg.contentType,
+        description: msg.description,
+        context: msg.context
+      })
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.json().catch(function() { return {}; }).then(function(err) {
+          throw new Error(err.error || 'Request failed (' + res.status + ')');
+        });
+      }
+      return res.json();
+    })
+    .then(function(data) {
+      figma.ui.postMessage({ type: 'generate-result', copies: data.copies });
+    })
+    .catch(function(err) {
+      figma.ui.postMessage({ type: 'generate-error', error: err.message || 'Something went wrong. Try again.' });
+    });
+  }
+
+  if (msg.type === 'tone-check') {
+    fetch('https://my-content-system-o9l2.vercel.app/api/tone-check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: msg.text,
+        contentType: msg.contentType
+      })
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.json().catch(function() { return {}; }).then(function(err) {
+          throw new Error(err.error || 'Request failed (' + res.status + ')');
+        });
+      }
+      return res.json();
+    })
+    .then(function(data) {
+      figma.ui.postMessage({ type: 'tone-check-result', data: data });
+    })
+    .catch(function(err) {
+      figma.ui.postMessage({ type: 'tone-check-error', error: err.message || 'Something went wrong. Try again.' });
+    });
+  }
 };

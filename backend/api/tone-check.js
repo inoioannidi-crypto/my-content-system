@@ -47,6 +47,10 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'text is required' });
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not configured.' });
+  }
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const userMessage = [
