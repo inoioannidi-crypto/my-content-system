@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   name: 'writingRule',
   title: 'Writing Rule',
   type: 'document',

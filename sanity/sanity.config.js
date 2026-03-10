@@ -1,15 +1,13 @@
-import { defineConfig } from 'sanity'
-import { structureTool } from 'sanity/structure'
-import { visionTool } from '@sanity/vision'
-import { schemaTypes } from './schemas/index.js'
+const { defineConfig } = require('sanity')
+const { structureTool } = require('sanity/structure')
+const { visionTool } = require('@sanity/vision')
+const { schemaTypes } = require('./schemas/index.js')
 
-export default defineConfig({
+module.exports = defineConfig({
   name: 'default',
   title: 'Workable Content System',
-
-  // Fill in your Sanity project ID after creating a project at sanity.io
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'cvggucp0',
-  dataset: process.env.SANITY_STUDIO_DATASET || 'production',
+  projectId: 'cvggucp0',
+  dataset: 'production',
 
   plugins: [
     structureTool({

@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   name: 'toneContext',
   title: 'Tone by Context',
   type: 'document',

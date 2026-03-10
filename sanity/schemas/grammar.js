@@ -1,12 +1,8 @@
-const stringArrayField = (name, title, description) => ({
-  name,
-  title,
-  description,
-  type: 'array',
-  of: [{ type: 'string' }],
-})
+function stringArrayField(name, title, description) {
+  return { name, title, description, type: 'array', of: [{ type: 'string' }] }
+}
 
-export default {
+module.exports = {
   name: 'grammar',
   title: 'Grammar & Style',
   type: 'document',

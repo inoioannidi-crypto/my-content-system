@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   name: 'brandVoice',
   title: 'Brand Voice',
   type: 'document',
