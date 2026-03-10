@@ -57,6 +57,8 @@ function extractJSON(text) {
 }
 
 module.exports = async function handler(req, res) {
+  console.log('FUNCTION CALLED');
+  console.log('ANTHROPIC_API_KEY exists:', !!process.env.ANTHROPIC_API_KEY);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
