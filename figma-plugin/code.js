@@ -120,10 +120,10 @@ function sendSelection() {
     topFrameName: info.topFrameName,
     pageName: pageName,
     nearbyText: getNearbyTextContent(node, 10),
-    fontSize: node.fontSize,
-    fontWeight: node.fontWeight,
+    fontSize: typeof node.fontSize === 'number' ? node.fontSize : null,
+    fontWeight: typeof node.fontWeight === 'number' ? node.fontWeight : null,
     charCount: node.characters.length,
-    textCase: node.textCase,
+    textCase: typeof node.textCase === 'string' ? node.textCase : null,
   });
 }
 
