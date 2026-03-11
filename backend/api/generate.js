@@ -41,12 +41,17 @@ TONE BY CONTENT TYPE:
 - Modal title: Sentence case. No period. Matches the primary action.
 - Helper text: One sentence. Sentence case. Full stop.
 
-Generate exactly 3 variations. Return ONLY valid JSON — no markdown, no explanation:
+Generate exactly 3 variations using Workable's writing values as the lens for each:
+- Simple: plain, everyday language a new user would instantly understand — no jargon, no assumptions
+- Direct: clear and unambiguous, no unnecessary words, says exactly what it means
+- Efficient: helps the user accomplish their task immediately — action-first, zero friction
+
+Return ONLY valid JSON — no markdown, no explanation:
 {
   "copies": [
+    { "label": "Simple", "text": "..." },
     { "label": "Direct", "text": "..." },
-    { "label": "Friendly", "text": "..." },
-    { "label": "Concise", "text": "..." }
+    { "label": "Efficient", "text": "..." }
   ]
 }`;
 
