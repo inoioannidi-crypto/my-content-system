@@ -65,6 +65,30 @@ async function importBrandVoice() {
         description: 'We help users accomplish their tasks quickly and without confusion.',
       },
     ],
+    body: [
+      ptBlock('What our voice sounds like', 'h2', 'bv-h1'),
+      ptBlock(
+        "Workable speaks clearly and confidently. We're knowledgeable without being stuffy, friendly without being casual. Our voice stays consistent whether we're onboarding a new user, showing an error, or sending a billing email.",
+        'normal',
+        'bv-p1'
+      ),
+      ptBlock('Applying the voice', 'h2', 'bv-h2'),
+      ptBullet('Read your copy aloud — if it sounds like a legal document, simplify it', 'bv-b1'),
+      ptBullet("Check that you lead with what matters to the user, not to Workable", 'bv-b2'),
+      ptBullet('Prefer "you" and "we" over passive constructions', 'bv-b3'),
+      ptBullet('Match warmth to context: more in onboarding, less in flash messages', 'bv-b4'),
+      ptBlock('The voice in practice', 'h2', 'bv-h3'),
+      ptDoAndDont(
+        'Your account is ready. Start adding your team.',
+        'The account setup process has been completed successfully.',
+        'bv-dd1'
+      ),
+      ptDoAndDont(
+        'Something went wrong. Try again or contact support.',
+        'An error has occurred in the system.',
+        'bv-dd2'
+      ),
+    ],
   })
   console.log('✓ Brand Voice')
 }
@@ -77,11 +101,16 @@ async function importWritingRules() {
       _id: 'writing-rule-1',
       number: 1,
       title: 'Lead with what matters most',
-      points: [
-        'keep your messages as short as possible',
-        'put the most important information at the start',
-        'use short, simple sentences',
-        'remove any content that does not help the user move towards their goal',
+      body: [
+        ptBullet('keep your messages as short as possible', 'wr1-b0'),
+        ptBullet('put the most important information at the start', 'wr1-b1'),
+        ptBullet('use short, simple sentences', 'wr1-b2'),
+        ptBullet('remove any content that does not help the user move towards their goal', 'wr1-b3'),
+        ptDoAndDont(
+          'Update your billing details to continue using Workable.',
+          'In order to ensure uninterrupted access to the Workable platform, please update your billing details at your earliest convenience.',
+          'wr1-dd0'
+        ),
       ],
       test: 'Can you cut the first sentence without losing meaning? Then cut it.',
     },
@@ -89,10 +118,15 @@ async function importWritingRules() {
       _id: 'writing-rule-2',
       number: 2,
       title: 'Focus on actions',
-      points: [
-        'make it clear what action the user needs to complete',
-        'match the main verb in the title and CTA',
-        'make sure all possible actions are distinct from each other and easily understandable',
+      body: [
+        ptBullet('make it clear what action the user needs to complete', 'wr2-b0'),
+        ptBullet('match the main verb in the title and CTA', 'wr2-b1'),
+        ptBullet('make sure all possible actions are distinct from each other and easily understandable', 'wr2-b2'),
+        ptDoAndDont(
+          'Title: "Start free trial" → Button: "Start free trial"',
+          'Title: "Start free trial" → Button: "Begin"',
+          'wr2-dd0'
+        ),
       ],
       test: 'Does the CTA verb match the title verb?',
     },
@@ -100,11 +134,12 @@ async function importWritingRules() {
       _id: 'writing-rule-3',
       number: 3,
       title: 'Sound simple, not smart',
-      points: [
-        'write simply and honestly',
-        'avoid adverbs, adjectives, and acronyms',
-        "don't make up a new word when a common one exists",
-        'focus on sounding simple, not smart',
+      body: [
+        ptBullet('write simply and honestly', 'wr3-b0'),
+        ptBullet('avoid adverbs, adjectives, and acronyms', 'wr3-b1'),
+        ptBullet("don't make up a new word when a common one exists", 'wr3-b2'),
+        ptBullet('focus on sounding simple, not smart', 'wr3-b3'),
+        ptDoAndDont('Add a job', 'Create a new job requisition', 'wr3-dd0'),
       ],
       test: 'Would a brand-new user understand every word without a glossary?',
     },
@@ -112,10 +147,11 @@ async function importWritingRules() {
       _id: 'writing-rule-4',
       number: 4,
       title: 'Write the way you speak',
-      points: [
-        'read your writing out loud — if it sounds stiff, rewrite it',
-        "use contractions: we've, you're, can't, it's",
-        'be conversational, friendly, and human',
+      body: [
+        ptBullet('read your writing out loud — if it sounds stiff, rewrite it', 'wr4-b0'),
+        ptBullet("use contractions: we've, you're, can't, it's", 'wr4-b1'),
+        ptBullet('be conversational, friendly, and human', 'wr4-b2'),
+        ptDoAndDont("You're all set.", 'Your account has been successfully configured.', 'wr4-dd0'),
       ],
       test: 'Would you actually say this sentence in a conversation?',
     },
@@ -123,12 +159,17 @@ async function importWritingRules() {
       _id: 'writing-rule-5',
       number: 5,
       title: 'Be positive and solution-focused',
-      points: [
-        "when something goes wrong, lead with the fix — not the problem",
-        "celebrate the user's achievements where appropriate, but sparingly",
-        'never blame the user — avoid "you did" or "you didn\'t"',
-        'avoid "Oops", "Whoops", or cutesy error language',
-        'use adjectives and exclamations sparingly',
+      body: [
+        ptBullet('when something goes wrong, lead with the fix — not the problem', 'wr5-b0'),
+        ptBullet("celebrate the user's achievements where appropriate, but sparingly", 'wr5-b1'),
+        ptBullet('never blame the user — avoid "you did" or "you didn\'t"', 'wr5-b2'),
+        ptBullet('avoid "Oops", "Whoops", or cutesy error language', 'wr5-b3'),
+        ptBullet('use adjectives and exclamations sparingly', 'wr5-b4'),
+        ptDoAndDont(
+          'Add a payment method to continue.',
+          "You haven't added a payment method.",
+          'wr5-dd0'
+        ),
       ],
       test: 'Does the message tell the user what to do next?',
     },
@@ -136,9 +177,10 @@ async function importWritingRules() {
       _id: 'writing-rule-6',
       number: 6,
       title: 'Use active voice',
-      points: [
-        'make it clear who is performing an action',
-        'refer to the company as "Workable" or "we" — not "the system" or passive constructions',
+      body: [
+        ptBullet('make it clear who is performing an action', 'wr6-b0'),
+        ptBullet('refer to the company as "Workable" or "we" — not "the system" or passive constructions', 'wr6-b1'),
+        ptDoAndDont('Workable sent you an email.', 'An email was sent to you.', 'wr6-dd0'),
       ],
       test: 'Can you answer "who is doing this?" from the sentence?',
     },
@@ -146,10 +188,15 @@ async function importWritingRules() {
       _id: 'writing-rule-7',
       number: 7,
       title: 'Support content with visuals or hyperlinks',
-      points: [
-        'sometimes an image describes something more effectively than words',
-        'consider adding videos, pictures, GIFs, or hyperlinks to support your messages',
-        'use visuals to set context and create understanding of the changes taking place',
+      body: [
+        ptBullet('sometimes an image describes something more effectively than words', 'wr7-b0'),
+        ptBullet('consider adding videos, pictures, GIFs, or hyperlinks to support your messages', 'wr7-b1'),
+        ptBullet('use visuals to set context and create understanding of the changes taking place', 'wr7-b2'),
+        ptDoAndDont(
+          'Use a screenshot to show where a setting is located.',
+          'Write a paragraph describing the location of a setting with no visual.',
+          'wr7-dd0'
+        ),
       ],
       test: 'Is there a visual that could make this clearer or more actionable?',
     },
@@ -221,87 +268,108 @@ async function importGrammar() {
   await client.createOrReplace({
     _id: 'grammar',
     _type: 'grammar',
+    body: [
+      ...buildSection('g-lang', 'Language', [
+        'Use US English throughout — spelling, grammar, punctuation, and formatting',
+        'Use "resume" not "CV"',
+        'Use "email" (one word, no hyphen)',
+        'Use "dropdown" (one word, no hyphen)',
+        'Use "wifi" (lowercase, no hyphen)',
+        'Use "healthcare", "website", "white paper", "skill set", "co-worker", "rehire"',
+        'Use "full-time / part-time" as adjective (a full-time role); "full time / part time" as adverb (she works full time)',
+        'Use "canceled", "canceling", "cancellation" — US English spellings only',
+        'Abbreviate countries as UK, USA, UAE — no full stops between letters',
+        "Always respect each company's official capitalization (LinkedIn, Google)",
+      ], [
+        { doExample: 'canceled, canceling', dontExample: 'cancelled, cancelling' },
+        { doExample: 'email', dontExample: 'e-mail' },
+      ]),
 
-    language: [
-      'Use US English throughout — spelling, grammar, punctuation, and formatting',
-      'Use "resume" not "CV"',
-      'Use "email" (one word, no hyphen)',
-      'Use "dropdown" (one word, no hyphen)',
-      'Use "wifi" (lowercase, no hyphen)',
-      'Use "healthcare", "website", "white paper", "skill set", "co-worker", "rehire"',
-      'Use "full-time / part-time" as adjective (a full-time role); "full time / part time" as adverb (she works full time)',
-      'Use "canceled", "canceling", "cancellation" — US English spellings only',
-      'Abbreviate countries as UK, USA, UAE — no full stops between letters',
-      'Always respect each company\'s official capitalization (LinkedIn, Google)',
-    ],
+      ...buildSection('g-cap', 'Capitalization', [
+        'Use sentence case for most product UI — page titles, buttons, menu items, access levels, roles, and settings',
+        'Sentence case: capitalize only the first word and proper nouns',
+        'Use title case only for branded Workable features (Video Interviews, Assessments, Hiring Plan), marketing-style page titles, and formal job titles used as proper nouns',
+        'Use ALL CAPS only when explicitly required by design (e.g. navigation tabs, pills)',
+      ], [
+        { doExample: 'Save changes (button)', dontExample: 'Save Changes (button)' },
+        { doExample: 'Video Interviews (branded feature)', dontExample: 'video interviews (branded feature)' },
+      ]),
 
-    capitalization: [
-      'Use sentence case for most product UI — page titles, buttons, menu items, access levels, roles, and settings',
-      'Sentence case: capitalize only the first word and proper nouns',
-      'Use title case only for branded Workable features (Video Interviews, Assessments, Hiring Plan), marketing-style page titles, and formal job titles used as proper nouns',
-      'Use ALL CAPS only when explicitly required by design (e.g. navigation tabs, pills)',
-    ],
+      ...buildSection('g-num', 'Numbers & symbols', [
+        'Always use numerals — write "3" not "three"',
+        'Use commas in large numbers (21,568 candidates)',
+        'Use full stops for decimal numbers (558.50 GBP per month)',
+        'Always use % not "percent" or "per cent"',
+        'Use the "200 USD" format with a space between number and currency code — avoid "$200"',
+        'Use Oxford comma in all lists of 3 or more items',
+      ], [
+        { doExample: '3 jobs posted', dontExample: 'three jobs posted' },
+        { doExample: '200 USD', dontExample: '$200' },
+      ]),
 
-    numbersAndSymbols: [
-      'Always use numerals — write "3" not "three"',
-      'Use commas in large numbers (21,568 candidates)',
-      'Use full stops for decimal numbers (558.50 GBP per month)',
-      'Always use % not "percent" or "per cent"',
-      'Use the "200 USD" format with a space between number and currency code — avoid "$200"',
-      'Use Oxford comma in all lists of 3 or more items',
-    ],
+      ...buildSection('g-punc', 'Punctuation', [
+        'Use full stops for descriptions, errors, and any content with more than 1 sentence',
+        'Do not use full stops on buttons, headings, or single-sentence UI elements',
+        'Do not use full stops at the end of bullet point items',
+        'Use exclamation marks only when users are genuinely feeling excitement or joy — never more than 1',
+        'Avoid "Oops" and "Whoops" in error messages — they feel patronizing',
+        'Use ellipsis only for loading or transitional states (Loading…, Generating…)',
+        'Avoid dashes (-) and em-dashes (—) in body copy — rewrite the sentence instead',
+        'Use en dash with no spaces (–) for fixed number ranges (10–15 employees)',
+        'Use en dash with spaces on both sides for time ranges (09:00 AM – 05:00 PM)',
+        'Avoid brackets unless expanding unknown terminology (ATS (Applicant Tracking System))',
+        'Avoid slashes instead of "and" or "or" — write the words out',
+        'When slashes divide multiple locations, write without spaces (Athens, Greece / London, UK)',
+        'Use ampersands (&) only when space is limited (buttons, navigation, table headers) — use "and" in body text',
+      ], [
+        { doExample: 'Add at least one job stage. (description, with full stop)', dontExample: 'Save changes. (button, no full stop needed)' },
+        { doExample: '10–15 employees (en dash)', dontExample: '10-15 employees (hyphen)' },
+      ]),
 
-    punctuation: [
-      'Use full stops for descriptions, errors, and any content with more than 1 sentence',
-      'Do not use full stops on buttons, headings, or single-sentence UI elements',
-      'Do not use full stops at the end of bullet point items',
-      'Use exclamation marks only when users are genuinely feeling excitement or joy — never more than 1',
-      'Avoid "Oops" and "Whoops" in error messages — they feel patronizing',
-      'Use ellipsis only for loading or transitional states (Loading…, Generating…)',
-      'Avoid dashes (-) and em-dashes (—) in body copy — rewrite the sentence instead',
-      'Use en dash with no spaces (–) for fixed number ranges (10–15 employees)',
-      'Use en dash with spaces on both sides for time ranges (09:00 AM – 05:00 PM)',
-      'Avoid brackets unless expanding unknown terminology (ATS (Applicant Tracking System))',
-      'Avoid slashes instead of "and" or "or" — write the words out',
-      'When slashes divide multiple locations, write without spaces (Athens, Greece / London, UK)',
-      'Use ampersands (&) only when space is limited (buttons, navigation, table headers) — use "and" in body text',
-    ],
+      ...buildSection('g-dates', 'Dates & times', [
+        'Full date format: Month DD, YYYY — e.g. September 13, 2021',
+        'Short date for tight spaces: MMM DD, YY — e.g. Sep 13, 21',
+        'Avoid all-numeric formats like 09/12/24 — they are ambiguous across regions',
+        'Avoid leading zeros in days or months unless required (March 5, 2023 not March 05, 2023)',
+        'Use 12-hour time format — AM and PM capitalized with a space before them (04:00 PM)',
+        'Times always have 4 numerals (09:45 AM, not 9:45AM)',
+        'Use 12:00 AM for midnight and 12:00 PM for midday',
+        'Include timezone code when communication spans multiple time zones (11:00 AM GMT)',
+      ], [
+        { doExample: 'September 13, 2021', dontExample: '09/13/21' },
+        { doExample: '04:00 PM', dontExample: '4pm' },
+      ]),
 
-    datesAndTimes: [
-      'Full date format: Month DD, YYYY — e.g. September 13, 2021',
-      'Short date for tight spaces: MMM DD, YY — e.g. Sep 13, 21',
-      'Avoid all-numeric formats like 09/12/24 — they are ambiguous across regions',
-      'Avoid leading zeros in days or months unless required (March 5, 2023 not March 05, 2023)',
-      'Use 12-hour time format — AM and PM capitalized with a space before them (04:00 PM)',
-      'Times always have 4 numerals (09:45 AM, not 9:45AM)',
-      'Use 12:00 AM for midnight and 12:00 PM for midday',
-      'Include timezone code when communication spans multiple time zones (11:00 AM GMT)',
-    ],
+      ...buildSection('g-words', 'Word choices', [
+        'Use "your" not "my" to describe things belonging to the user (Your profile, not My profile)',
+        'Use "view" not "see" when giving instructions to look at something',
+        'Use "choose" for conceptual decisions and preferences; "select" for UI controls and dropdowns',
+        'Use "edit" when modifying existing data; "change" when switching between options',
+        'Use "For example" in body copy; "e.g." only in space-constrained UI (lowercase, no colon after)',
+        'Never use "etc." — list up to 3 examples explicitly instead',
+        'Never use "click" — use "select" (device-agnostic)',
+        'Avoid "pick" — too informal',
+        'Use "Workable" or "we" to refer to the company — not "the system", "our product", or "I"',
+        'Use "login" as noun or adjective; "log in" as verb',
+        'Use "setup" as noun or adjective; "set up" as verb',
+        'Use "profile photo" not "profile picture" or "profile image"',
+        'Use "self-" prefix with hyphen (self-review, self-motivated, self-improvement)',
+        'Avoid emoji — accessibility difficulties, cultural ambiguity, and inappropriate in frustrated moments',
+        'Use "Free Tools for Managers" (capitalized); never "FTFM" in customer-facing copy',
+        'Use "resume" not "CV" in all materials',
+      ], [
+        { doExample: 'Your profile', dontExample: 'My profile' },
+        { doExample: 'Select from the dropdown', dontExample: 'Click on the dropdown' },
+      ]),
 
-    wordChoices: [
-      'Use "your" not "my" to describe things belonging to the user (Your profile, not My profile)',
-      'Use "view" not "see" when giving instructions to look at something',
-      'Use "choose" for conceptual decisions and preferences; "select" for UI controls and dropdowns',
-      'Use "edit" when modifying existing data; "change" when switching between options',
-      'Use "For example" in body copy; "e.g." only in space-constrained UI (lowercase, no colon after)',
-      'Never use "etc." — list up to 3 examples explicitly instead',
-      'Never use "click" — use "select" (device-agnostic)',
-      'Avoid "pick" — too informal',
-      'Use "Workable" or "we" to refer to the company — not "the system", "our product", or "I"',
-      'Use "login" as noun or adjective; "log in" as verb',
-      'Use "setup" as noun or adjective; "set up" as verb',
-      'Use "profile photo" not "profile picture" or "profile image"',
-      'Use "self-" prefix with hyphen (self-review, self-motivated, self-improvement)',
-      'Avoid emoji — accessibility difficulties, cultural ambiguity, and inappropriate in frustrated moments',
-      'Use "Free Tools for Managers" (capitalized); never "FTFM" in customer-facing copy',
-      'Use "resume" not "CV" in all materials',
-    ],
-
-    bulletPoints: [
-      'Only write one sentence per bullet point',
-      'Do not use capital letters at the start of bullet points',
-      'Do not use punctuation at the end of bullet points',
-      'Each bullet must complete the introductory sentence that precedes the list',
+      ...buildSection('g-bullets', 'Bullet points', [
+        'Only write one sentence per bullet point',
+        'Do not use capital letters at the start of bullet points',
+        'Do not use punctuation at the end of bullet points',
+        'Each bullet must complete the introductory sentence that precedes the list',
+      ], [
+        { doExample: 'add your job title (no capital, no full stop)', dontExample: 'Add your job title. (capital and full stop)' },
+      ]),
     ],
   })
   console.log('✓ Grammar & Style')
@@ -348,6 +416,17 @@ function buildBody(id, rules, doAndDonts = []) {
     })
   }
   return body
+}
+
+function buildSection(id, heading, rules, doAndDonts = []) {
+  const items = [
+    ptBlock(heading, 'h2', `${id}-h`),
+    ...rules.map((r, i) => ptBullet(r, `${id}-b${i}`)),
+  ]
+  doAndDonts.forEach(({ doExample, dontExample }, i) => {
+    items.push(ptDoAndDont(doExample, dontExample, `${id}-dd${i}`))
+  })
+  return items
 }
 
 async function importContentTypes() {

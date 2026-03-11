@@ -32,6 +32,29 @@ export default {
       }],
     },
     {
+      name: 'body',
+      title: 'Body',
+      description: 'Rich narrative guidance on applying the brand voice',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'Heading 2', value: 'h2' },
+            { title: 'Heading 3', value: 'h3' },
+          ],
+          marks: {
+            decorators: [
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+            ],
+          },
+        },
+        { type: 'doAndDont' },
+      ],
+    },
+    {
       name: 'coverImage',
       title: 'Cover image',
       description: 'A visual that represents the brand voice (e.g. tone reference chart)',

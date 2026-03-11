@@ -21,11 +21,27 @@ export default {
       validation: (R) => R.required(),
     },
     {
-      name: 'points',
-      title: 'Points',
-      description: 'Each item is a bullet point explaining the rule',
+      name: 'body',
+      title: 'Body',
+      description: "Rule explanation with bullet points and do/don't examples",
       type: 'array',
-      of: [{ type: 'string' }],
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'Heading 2', value: 'h2' },
+            { title: 'Heading 3', value: 'h3' },
+          ],
+          marks: {
+            decorators: [
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+            ],
+          },
+        },
+        { type: 'doAndDont' },
+      ],
     },
     {
       name: 'test',
