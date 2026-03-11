@@ -38,6 +38,67 @@ function getAncestorInfo(node) {
   };
 }
 
+// Collect actual text content from sibling/nearby text nodes in the same top-level frame.
+// Sorted by spatial proximity to the selected node so the most relevant text comes first.
+function getNearbyTextContent(selectedNode, maxCount) {
+  maxCount = maxCount || 10;
+
+  // Find the topmost FRAME ancestor — the whole screen/component
+  var container = null;
+  var p = selectedNode.parent;
+  while (p && p.type !== 'PAGE') {
+    if (p.type === 'FRAME') container = p;
+    p = p.parent;
+  }
+  // Fall back to immediate parent if no frame exists above
+  if (!container) container = selectedNode.parent;
+  if (!container || container.type === 'PAGE') return [];
+
+  // Depth-first collect all visible TEXT nodes (skip the selected one)
+  var candidates = [];
+  function collect(node) {
+    if (node === selectedNode) return;
+    if (node.visible === false) return;
+    if (node.type === 'TEXT') {
+      var text = node.characters ? node.characters.trim() : '';
+      if (text) candidates.push({ text: text, node: node });
+    }
+    if ('children' in node) {
+      for (var i = 0; i < node.children.length; i++) collect(node.children[i]);
+    }
+  }
+  collect(container);
+
+  // Sort by Euclidean distance from the selected node's centre
+  var selBox = selectedNode.absoluteBoundingBox;
+  if (selBox && candidates.length > 1) {
+    var cx = selBox.x + selBox.width / 2;
+    var cy = selBox.y + selBox.height / 2;
+    candidates.sort(function(a, b) {
+      var ab = a.node.absoluteBoundingBox || {};
+      var bb = b.node.absoluteBoundingBox || {};
+      var ad = Math.pow((ab.x || 0) + (ab.width || 0) / 2 - cx, 2)
+              + Math.pow((ab.y || 0) + (ab.height || 0) / 2 - cy, 2);
+      var bd = Math.pow((bb.x || 0) + (bb.width || 0) / 2 - cx, 2)
+              + Math.pow((bb.y || 0) + (bb.height || 0) / 2 - cy, 2);
+      return ad - bd;
+    });
+  }
+
+  // Deduplicate and truncate each string; return up to maxCount
+  var seen = {};
+  var results = [];
+  for (var i = 0; i < candidates.length && results.length < maxCount; i++) {
+    var t = candidates[i].text;
+    if (t.length > 120) t = t.slice(0, 120) + '…';
+    if (!seen[t]) {
+      seen[t] = true;
+      results.push(t);
+    }
+  }
+  return results;
+}
+
 // Build a human-readable context string, e.g.:
 //   "Button label" in Create Job Modal, Onboarding page
 function buildAutoContext(nodeName, info, pageName) {
@@ -80,6 +141,7 @@ function sendSelection() {
     parentFrameName: info.parentFrameName,
     topFrameName: info.topFrameName,
     pageName: pageName,
+    nearbyText: getNearbyTextContent(node, 10),
   });
 }
 

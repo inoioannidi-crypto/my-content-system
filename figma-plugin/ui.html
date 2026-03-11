@@ -436,7 +436,7 @@
           <button id="context-reset" class="btn-reset" style="display:none">Reset to auto-detected</button>
         </div>
         <input type="text" id="gen-context" placeholder="Select a layer to auto-detect context" />
-        <div id="context-hint" class="context-hint" style="display:none">✦ Auto-detected from layer</div>
+        <div id="context-hint" class="context-hint" style="display:none"></div>
       </div>
 
       <button class="btn-primary" id="gen-btn">
@@ -526,6 +526,7 @@
     let typeUserEdited = false;      // true when user has manually changed the type dropdown
     let autoDescription = '';     // last auto-suggested description string
     let descriptionUserEdited = false; // true when user has manually changed the description
+    let autoNearbyText = [];      // nearby text strings collected from surrounding layers
 
     // ── Tab switching ──
     document.querySelectorAll('.tab').forEach(function(tab) {
@@ -546,6 +547,9 @@
         selectedText = msg.text;
         hasSelection = msg.hasSelection;
         updateSelectionBanners();
+
+        // ── Nearby text ──
+        autoNearbyText = msg.nearbyText || [];
 
         // ── Auto-fill context ──
         var prevAutoContext = autoContext;
@@ -652,7 +656,17 @@
       var resetBtn = document.getElementById('context-reset');
       var isAutoFilled = !contextUserEdited && autoContext !== '' && field.value === autoContext;
       var showReset = contextUserEdited && autoContext !== '';
-      hint.style.display = isAutoFilled ? 'block' : 'none';
+      var nearbyCount = autoNearbyText.length;
+
+      if (isAutoFilled || nearbyCount > 0) {
+        var parts = [];
+        if (isAutoFilled) parts.push('✦ Auto-detected from layer');
+        if (nearbyCount > 0) parts.push(nearbyCount + ' nearby text node' + (nearbyCount !== 1 ? 's' : '') + ' included');
+        hint.textContent = parts.join(' · ');
+        hint.style.display = 'block';
+      } else {
+        hint.style.display = 'none';
+      }
       resetBtn.style.display = showReset ? 'inline' : 'none';
     }
 
@@ -829,11 +843,20 @@
       setGenerateLoading(true);
       document.getElementById('gen-results').style.display = 'none';
 
+      // Append nearby screen text to context so Claude understands the real content of the screen
+      var fullContext = context;
+      if (autoNearbyText.length > 0) {
+        var nearbyStr = autoNearbyText.join(' · ');
+        fullContext = fullContext
+          ? fullContext + '\n\nNearby text on screen: ' + nearbyStr
+          : 'Nearby text on screen: ' + nearbyStr;
+      }
+
       parent.postMessage({ pluginMessage: {
         type: 'generate',
         contentType: contentType,
         description: description,
-        context: context || undefined
+        context: fullContext || undefined
       }}, '*');
     });
 
