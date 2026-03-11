@@ -40,6 +40,7 @@ TONE BY CONTENT TYPE:
 - Page title/Heading: Sentence case. No period.
 - Modal title: Sentence case. No period. Matches the primary action.
 - Helper text: One sentence. Sentence case. Full stop.
+- Body text / Description: Short to medium informational or explanatory text that provides context, sets expectations, or describes a process. Conversational, clear, and concise. Full stop. 1–3 sentences max.
 
 Generate exactly 3 variations using Workable's writing values as the lens for each:
 - Simple: plain, everyday language a new user would instantly understand — no jargon, no assumptions

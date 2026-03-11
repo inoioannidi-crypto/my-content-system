@@ -417,6 +417,7 @@
           <option value="Page title / Heading">Page title / Heading</option>
           <option value="Modal title">Modal title</option>
           <option value="Helper text">Helper text</option>
+          <option value="Body text / Description">Body text / Description</option>
         </select>
         <div id="type-hint" class="context-hint" style="display:none">✦ Auto-detected from layer</div>
       </div>
@@ -486,6 +487,7 @@
           <option value="Page title / Heading">Page title / Heading</option>
           <option value="Modal title">Modal title</option>
           <option value="Helper text">Helper text</option>
+          <option value="Body text / Description">Body text / Description</option>
         </select>
       </div>
 
@@ -746,6 +748,7 @@
       { p: ['notification'],                                               t: 'Notification' },
       { p: ['modal', 'dialog'],                                            t: 'Modal title' },
       { p: ['flash'],                                                      t: 'Flash message' },
+      { p: ['body', 'description', 'paragraph', 'output', 'question', 'supporting', 'subtext', 'caption', 'detail'], t: 'Body text / Description', max: 1 },
       // Broader single-word patterns — only matched on component or node name, not frame name
       { p: ['error'],    t: 'Error message',          max: 1 },
       { p: ['label'],    t: 'Form label',             max: 1 },
