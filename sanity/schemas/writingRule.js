@@ -33,6 +33,13 @@ export default {
       description: 'A yes/no question to test if the copy follows this rule',
       type: 'string',
     },
+    {
+      name: 'exampleImage',
+      title: 'Example image',
+      description: 'A visual example of this rule applied in the product',
+      type: 'image',
+      options: { hotspot: true },
+    },
   ],
   preview: {
     select: { title: 'title', subtitle: 'number' },

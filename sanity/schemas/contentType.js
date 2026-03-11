@@ -27,6 +27,13 @@ export default {
       type: 'array',
       of: [{ type: 'string' }],
     },
+    {
+      name: 'exampleImage',
+      title: 'Example image',
+      description: 'An annotated screenshot or diagram illustrating this content type',
+      type: 'image',
+      options: { hotspot: true },
+    },
   ],
   preview: {
     select: { title: 'type' },

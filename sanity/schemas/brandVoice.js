@@ -31,6 +31,13 @@ export default {
         preview: { select: { title: 'name', subtitle: 'description' } },
       }],
     },
+    {
+      name: 'coverImage',
+      title: 'Cover image',
+      description: 'A visual that represents the brand voice (e.g. tone reference chart)',
+      type: 'image',
+      options: { hotspot: true },
+    },
   ],
   preview: { prepare: () => ({ title: 'Brand Voice' }) },
 }
