@@ -6,12 +6,45 @@ function getSelectedTextNode() {
   return textNodes.length === 1 ? textNodes[0] : null;
 }
 
+// Walk up the parent chain to find the nearest named Frame or Component.
+function getParentFrame(node) {
+  var parent = node.parent;
+  while (parent) {
+    if (parent.type === 'PAGE') break;
+    if (
+      parent.type === 'FRAME' ||
+      parent.type === 'COMPONENT' ||
+      parent.type === 'COMPONENT_SET'
+    ) {
+      return parent;
+    }
+    parent = parent.parent;
+  }
+  return null;
+}
+
+// Build a human-readable context string from the node's position in the file.
+// e.g. "Submit" in Create Job Modal, Onboarding page
+function buildAutoContext(node) {
+  var parts = [];
+  if (node.name) {
+    parts.push('"' + node.name + '"');
+  }
+  var parentFrame = getParentFrame(node);
+  if (parentFrame && parentFrame.name) {
+    parts.push('in ' + parentFrame.name);
+  }
+  parts.push(figma.currentPage.name + ' page');
+  return parts.join(', ');
+}
+
 function sendSelection() {
   var node = getSelectedTextNode();
   figma.ui.postMessage({
     type: 'selection-changed',
     text: node ? node.characters : null,
     hasSelection: node !== null,
+    autoContext: node ? buildAutoContext(node) : null,
   });
 }
 

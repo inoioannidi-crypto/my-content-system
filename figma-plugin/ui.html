@@ -346,6 +346,37 @@
       background: var(--border);
       margin: 14px 0;
     }
+
+    /* ── Auto-context ── */
+    .context-field-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .context-field-header label { margin-bottom: 0; }
+
+    .context-hint {
+      margin-top: 4px;
+      font-size: 10px;
+      color: var(--accent);
+      opacity: 0.75;
+    }
+
+    .btn-reset {
+      padding: 0;
+      background: none;
+      border: none;
+      font-size: 10px;
+      font-family: inherit;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      opacity: 0.8;
+    }
+
+    .btn-reset:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -392,8 +423,12 @@
       </div>
 
       <div class="field">
-        <label for="gen-context">Context <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input type="text" id="gen-context" placeholder="e.g. Step 3 of onboarding, after user adds first job" />
+        <div class="context-field-header">
+          <label for="gen-context">Context <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <button id="context-reset" class="btn-reset" style="display:none">Reset to auto-detected</button>
+        </div>
+        <input type="text" id="gen-context" placeholder="Select a layer to auto-detect context" />
+        <div id="context-hint" class="context-hint" style="display:none">✦ Auto-detected from layer</div>
       </div>
 
       <button class="btn-primary" id="gen-btn">
@@ -477,6 +512,8 @@
     let hasSelection = false;
     let genLoading = false;
     let tcLoading = false;
+    let autoContext = '';        // last auto-detected context string from code.js
+    let contextUserEdited = false;  // true when user has manually changed the context field
 
     // ── Tab switching ──
     document.querySelectorAll('.tab').forEach(function(tab) {
@@ -497,6 +534,20 @@
         selectedText = msg.text;
         hasSelection = msg.hasSelection;
         updateSelectionBanners();
+
+        // Auto-fill context field from layer/frame/page name
+        var prevAutoContext = autoContext;
+        autoContext = msg.autoContext || '';
+        var contextField = document.getElementById('gen-context');
+        // Update the field when:
+        //   - user hasn't manually edited it, OR
+        //   - field still shows the previous auto-detected value (they changed selection), OR
+        //   - field is empty
+        if (!contextUserEdited || contextField.value === prevAutoContext || contextField.value === '') {
+          contextField.value = autoContext;
+          contextUserEdited = false;
+        }
+        updateContextState();
 
         // Auto-fill tone check textarea from selection
         var tcText = document.getElementById('tc-text');
@@ -558,6 +609,28 @@
         tcBannerText.textContent = 'No text layer selected — paste copy to review manually';
       }
     }
+
+    // ── Context auto-detect ──
+    function updateContextState() {
+      var field = document.getElementById('gen-context');
+      var hint = document.getElementById('context-hint');
+      var resetBtn = document.getElementById('context-reset');
+      var isAutoFilled = !contextUserEdited && autoContext !== '' && field.value === autoContext;
+      var showReset = contextUserEdited && autoContext !== '';
+      hint.style.display = isAutoFilled ? 'block' : 'none';
+      resetBtn.style.display = showReset ? 'inline' : 'none';
+    }
+
+    document.getElementById('gen-context').addEventListener('input', function() {
+      contextUserEdited = this.value !== autoContext;
+      updateContextState();
+    });
+
+    document.getElementById('context-reset').addEventListener('click', function() {
+      document.getElementById('gen-context').value = autoContext;
+      contextUserEdited = false;
+      updateContextState();
+    });
 
     // ── Generate ──
     document.getElementById('gen-btn').addEventListener('click', function() {
