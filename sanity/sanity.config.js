@@ -1,9 +1,9 @@
-const { defineConfig } = require('sanity')
-const { structureTool } = require('sanity/structure')
-const { visionTool } = require('@sanity/vision')
-const { schemaTypes } = require('./schemas/index.js')
+import { defineConfig } from 'sanity'
+import { structureTool } from 'sanity/structure'
+import { visionTool } from '@sanity/vision'
+import { schemaTypes } from './schemas/index.js'
 
-module.exports = defineConfig({
+export default defineConfig({
   name: 'default',
   title: 'Workable Content System',
   projectId: 'cvggucp0',
