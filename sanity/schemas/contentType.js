@@ -21,11 +21,27 @@ export default {
       validation: (R) => R.required(),
     },
     {
-      name: 'rules',
-      title: 'Rules',
-      description: 'Quick-reference rules specific to this content type',
+      name: 'body',
+      title: 'Body',
+      description: "Rich text rules and do/don't examples for this content type",
       type: 'array',
-      of: [{ type: 'string' }],
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'Heading 2', value: 'h2' },
+            { title: 'Heading 3', value: 'h3' },
+          ],
+          marks: {
+            decorators: [
+              { title: 'Bold', value: 'strong' },
+              { title: 'Italic', value: 'em' },
+            ],
+          },
+        },
+        { type: 'doAndDont' },
+      ],
     },
     {
       name: 'exampleImage',
