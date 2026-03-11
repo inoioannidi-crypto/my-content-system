@@ -396,7 +396,10 @@
       </div>
 
       <div class="field">
-        <label for="gen-type">Content type</label>
+        <div class="context-field-header">
+          <label for="gen-type" style="margin-bottom:0">Content type</label>
+          <button id="type-reset" class="btn-reset" style="display:none">Reset to auto-detected</button>
+        </div>
         <select id="gen-type">
           <option value="">Choose a type…</option>
           <option value="Button / CTA">Button / CTA</option>
@@ -415,11 +418,16 @@
           <option value="Modal title">Modal title</option>
           <option value="Helper text">Helper text</option>
         </select>
+        <div id="type-hint" class="context-hint" style="display:none">✦ Auto-detected from layer</div>
       </div>
 
       <div class="field">
-        <label for="gen-description">Describe what you need</label>
+        <div class="context-field-header">
+          <label for="gen-description" style="margin-bottom:0">Describe what you need</label>
+          <button id="desc-reset" class="btn-reset" style="display:none">Reset to auto-suggested</button>
+        </div>
         <textarea id="gen-description" rows="3" placeholder="e.g. A button to submit a job application form"></textarea>
+        <div id="desc-hint" class="context-hint" style="display:none">✦ Auto-suggested from layer</div>
       </div>
 
       <div class="field">
@@ -512,8 +520,12 @@
     let hasSelection = false;
     let genLoading = false;
     let tcLoading = false;
-    let autoContext = '';        // last auto-detected context string from code.js
-    let contextUserEdited = false;  // true when user has manually changed the context field
+    let autoContext = '';         // last auto-detected context string from code.js
+    let contextUserEdited = false;   // true when user has manually changed the context field
+    let autoType = '';            // last auto-detected content type value
+    let typeUserEdited = false;      // true when user has manually changed the type dropdown
+    let autoDescription = '';     // last auto-suggested description string
+    let descriptionUserEdited = false; // true when user has manually changed the description
 
     // ── Tab switching ──
     document.querySelectorAll('.tab').forEach(function(tab) {
@@ -535,19 +547,42 @@
         hasSelection = msg.hasSelection;
         updateSelectionBanners();
 
-        // Auto-fill context field from layer/frame/page name
+        // ── Auto-fill context ──
         var prevAutoContext = autoContext;
         autoContext = msg.autoContext || '';
         var contextField = document.getElementById('gen-context');
-        // Update the field when:
-        //   - user hasn't manually edited it, OR
-        //   - field still shows the previous auto-detected value (they changed selection), OR
-        //   - field is empty
         if (!contextUserEdited || contextField.value === prevAutoContext || contextField.value === '') {
           contextField.value = autoContext;
           contextUserEdited = false;
         }
         updateContextState();
+
+        // ── Auto-detect content type ──
+        var prevAutoType = autoType;
+        autoType = msg.hasSelection
+          ? inferContentType(msg.nodeName, msg.parentComponentName, msg.parentFrameName)
+          : '';
+        var typeSelect = document.getElementById('gen-type');
+        if (!typeUserEdited || typeSelect.value === prevAutoType || typeSelect.value === '') {
+          typeSelect.value = autoType;
+          typeUserEdited = false;
+        }
+        updateTypeState();
+
+        // ── Auto-suggest description ──
+        var prevAutoDescription = autoDescription;
+        autoDescription = msg.hasSelection
+          ? buildAutoDescription(
+              msg.nodeName, msg.text, autoType,
+              msg.parentComponentName, msg.parentFrameName, msg.topFrameName
+            )
+          : '';
+        var descField = document.getElementById('gen-description');
+        if (!descriptionUserEdited || descField.value === prevAutoDescription || descField.value === '') {
+          descField.value = autoDescription;
+          descriptionUserEdited = false;
+        }
+        updateDescriptionState();
 
         // Auto-fill tone check textarea from selection
         var tcText = document.getElementById('tc-text');
@@ -631,6 +666,149 @@
       contextUserEdited = false;
       updateContextState();
     });
+
+    // ── Type auto-detect state ──
+    function updateTypeState() {
+      var el = document.getElementById('gen-type');
+      var hint = document.getElementById('type-hint');
+      var resetBtn = document.getElementById('type-reset');
+      var isAuto = !typeUserEdited && autoType !== '' && el.value === autoType;
+      hint.style.display = isAuto ? 'block' : 'none';
+      resetBtn.style.display = (typeUserEdited && autoType !== '') ? 'inline' : 'none';
+    }
+
+    document.getElementById('gen-type').addEventListener('change', function() {
+      typeUserEdited = this.value !== autoType;
+      updateTypeState();
+    });
+
+    document.getElementById('type-reset').addEventListener('click', function() {
+      document.getElementById('gen-type').value = autoType;
+      typeUserEdited = false;
+      updateTypeState();
+    });
+
+    // ── Description auto-suggest state ──
+    function updateDescriptionState() {
+      var el = document.getElementById('gen-description');
+      var hint = document.getElementById('desc-hint');
+      var resetBtn = document.getElementById('desc-reset');
+      var isAuto = !descriptionUserEdited && autoDescription !== '' && el.value.trim() === autoDescription.trim();
+      hint.style.display = isAuto ? 'block' : 'none';
+      resetBtn.style.display = (descriptionUserEdited && autoDescription !== '') ? 'inline' : 'none';
+    }
+
+    document.getElementById('gen-description').addEventListener('input', function() {
+      descriptionUserEdited = this.value !== autoDescription;
+      updateDescriptionState();
+    });
+
+    document.getElementById('desc-reset').addEventListener('click', function() {
+      document.getElementById('gen-description').value = autoDescription;
+      descriptionUserEdited = false;
+      updateDescriptionState();
+    });
+
+    // ── Content type inference ──
+    // Rules are checked in source-priority order: componentName > nodeName > frameName.
+    // maxSourceIndex limits how broadly a pattern matches:
+    //   0 = component name only, 1 = component + node name, 2+ = all three (default)
+    var TYPE_RULES = [
+      { p: ['email subject', 'subject line'],                              t: 'Email subject' },
+      { p: ['email body', 'email content'],                                t: 'Email body' },
+      { p: ['empty state', 'empty-state', 'zero state', 'no results', 'null state', 'no data'], t: 'Empty state' },
+      { p: ['modal title', 'dialog title'],                                t: 'Modal title' },
+      { p: ['error message', 'validation error', 'field error', 'error text', 'alert danger', 'alert-danger'], t: 'Error message' },
+      { p: ['success message', 'alert success', 'alert-success'],          t: 'Success message' },
+      { p: ['flash message', 'toast', 'snackbar'],                         t: 'Flash message' },
+      { p: ['push notification'],                                          t: 'Notification' },
+      { p: ['onboarding', 'welcome screen', 'setup wizard'],               t: 'Onboarding copy' },
+      { p: ['placeholder text', 'placeholder'],                            t: 'Placeholder text' },
+      { p: ['tooltip'],                                                     t: 'Tooltip' },
+      { p: ['page title', 'screen title', 'section heading'],              t: 'Page title / Heading' },
+      { p: ['helper text', 'supporting text', 'hint text'],                t: 'Helper text' },
+      { p: ['form label', 'field label', 'input label'],                   t: 'Form label' },
+      { p: ['button', 'btn', 'cta'],                                       t: 'Button / CTA' },
+      { p: ['notification'],                                               t: 'Notification' },
+      { p: ['modal', 'dialog'],                                            t: 'Modal title' },
+      { p: ['flash'],                                                      t: 'Flash message' },
+      // Broader single-word patterns — only matched on component or node name, not frame name
+      { p: ['error'],    t: 'Error message',          max: 1 },
+      { p: ['label'],    t: 'Form label',             max: 1 },
+      { p: ['heading', 'title'], t: 'Page title / Heading', max: 1 },
+    ];
+
+    function inferContentType(nodeName, componentName, frameName) {
+      var sources = [componentName, nodeName, frameName];
+      for (var si = 0; si < sources.length; si++) {
+        var src = (sources[si] || '').toLowerCase();
+        if (!src) continue;
+        for (var ri = 0; ri < TYPE_RULES.length; ri++) {
+          var rule = TYPE_RULES[ri];
+          if (rule.max !== undefined && si > rule.max) continue;
+          if (rule.p.some(function(kw) { return src.includes(kw); })) return rule.t;
+        }
+      }
+      return '';
+    }
+
+    // ── Description auto-suggest ──
+    function buildAutoDescription(nodeName, nodeText, contentType, componentName, frameName, topFrameName) {
+      var label = (nodeText || '').trim();
+      var layer = (nodeName || '').trim();
+      // Use the screen-level frame for context; fall back to immediate frame
+      var where = (topFrameName || frameName || '').trim();
+      var display = label || layer;
+
+      switch (contentType) {
+        case 'Button / CTA':
+          return display && where ? 'A "' + display + '" button in ' + where
+               : display         ? 'A "' + display + '" button'
+               : where           ? 'A button in ' + where
+               :                   'A button';
+        case 'Error message':
+          return where ? 'An error message in ' + where : 'An error message';
+        case 'Success message':
+          return where ? 'A success message in ' + where : 'A success message';
+        case 'Flash message':
+          return where ? 'A flash message in ' + where : 'A flash message';
+        case 'Onboarding copy':
+          return where ? 'Onboarding copy for ' + where : 'Onboarding copy';
+        case 'Empty state':
+          return where ? 'An empty state for ' + where : 'An empty state';
+        case 'Form label':
+          return layer && where ? 'A label for the ' + layer + ' field in ' + where
+               : where          ? 'A form field label in ' + where
+               :                  'A form field label';
+        case 'Placeholder text':
+          return layer && where ? 'Placeholder text for the ' + layer + ' field in ' + where
+               : where          ? 'Placeholder text in ' + where
+               :                  'Placeholder text';
+        case 'Tooltip':
+          return layer && where ? 'A tooltip for ' + layer + ' in ' + where
+               : where          ? 'A tooltip in ' + where
+               :                  'A tooltip';
+        case 'Email subject':
+          return where ? 'An email subject for ' + where : 'An email subject';
+        case 'Email body':
+          return where ? 'Email body copy for ' + where : 'Email body copy';
+        case 'Notification':
+          return where ? 'A notification for ' + where : 'A notification';
+        case 'Page title / Heading':
+          return where ? 'A page title for ' + where : 'A page title or heading';
+        case 'Modal title':
+          var modal = (frameName || where || '').trim();
+          return modal ? 'A modal title for ' + modal : 'A modal title';
+        case 'Helper text':
+          return layer && where ? 'Helper text for ' + layer + ' in ' + where
+               : where          ? 'Helper text in ' + where
+               :                  'Helper text';
+        default:
+          return display && where ? '"' + display + '" in ' + where
+               : where            ? 'Copy for ' + where
+               :                   '';
+      }
+    }
 
     // ── Generate ──
     document.getElementById('gen-btn').addEventListener('click', function() {

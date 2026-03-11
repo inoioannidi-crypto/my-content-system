@@ -6,45 +6,80 @@ function getSelectedTextNode() {
   return textNodes.length === 1 ? textNodes[0] : null;
 }
 
-// Walk up the parent chain to find the nearest named Frame or Component.
-function getParentFrame(node) {
+// Walk the ancestor chain and return the nearest Component and Frame ancestors.
+// parentComponent — nearest COMPONENT or COMPONENT_SET (tells us what UI component the text lives in)
+// parentFrame     — nearest FRAME (immediate screen section or container)
+// topFrame        — topmost FRAME direct descendant of the page (the whole screen)
+function getAncestorInfo(node) {
+  var parentComponent = null;
+  var parentFrame = null;
+  var topFrame = null;
   var parent = node.parent;
+
   while (parent) {
     if (parent.type === 'PAGE') break;
-    if (
-      parent.type === 'FRAME' ||
-      parent.type === 'COMPONENT' ||
-      parent.type === 'COMPONENT_SET'
-    ) {
-      return parent;
+
+    if ((parent.type === 'COMPONENT' || parent.type === 'COMPONENT_SET') && !parentComponent) {
+      parentComponent = parent;
     }
+
+    if (parent.type === 'FRAME') {
+      if (!parentFrame) parentFrame = parent;
+      topFrame = parent; // keep overwriting — ends up as the topmost FRAME
+    }
+
     parent = parent.parent;
   }
-  return null;
+
+  return {
+    parentComponentName: parentComponent ? parentComponent.name : null,
+    parentFrameName:     parentFrame     ? parentFrame.name     : null,
+    topFrameName:        topFrame        ? topFrame.name        : null,
+  };
 }
 
-// Build a human-readable context string from the node's position in the file.
-// e.g. "Submit" in Create Job Modal, Onboarding page
-function buildAutoContext(node) {
+// Build a human-readable context string, e.g.:
+//   "Button label" in Create Job Modal, Onboarding page
+function buildAutoContext(nodeName, info, pageName) {
   var parts = [];
-  if (node.name) {
-    parts.push('"' + node.name + '"');
-  }
-  var parentFrame = getParentFrame(node);
-  if (parentFrame && parentFrame.name) {
-    parts.push('in ' + parentFrame.name);
-  }
-  parts.push(figma.currentPage.name + ' page');
+  if (nodeName) parts.push('"' + nodeName + '"');
+  var container = info.topFrameName || info.parentFrameName;
+  if (container) parts.push('in ' + container);
+  parts.push(pageName + ' page');
   return parts.join(', ');
 }
 
 function sendSelection() {
   var node = getSelectedTextNode();
+
+  if (!node) {
+    figma.ui.postMessage({
+      type: 'selection-changed',
+      hasSelection: false,
+      text: null,
+      autoContext: null,
+      nodeName: null,
+      parentComponentName: null,
+      parentFrameName: null,
+      topFrameName: null,
+      pageName: null,
+    });
+    return;
+  }
+
+  var info = getAncestorInfo(node);
+  var pageName = figma.currentPage.name;
+
   figma.ui.postMessage({
     type: 'selection-changed',
-    text: node ? node.characters : null,
-    hasSelection: node !== null,
-    autoContext: node ? buildAutoContext(node) : null,
+    hasSelection: true,
+    text: node.characters,
+    autoContext: buildAutoContext(node.name, info, pageName),
+    nodeName: node.name,
+    parentComponentName: info.parentComponentName,
+    parentFrameName: info.parentFrameName,
+    topFrameName: info.topFrameName,
+    pageName: pageName,
   });
 }
 
