@@ -38,20 +38,21 @@ function getAncestorInfo(node) {
   };
 }
 
-// Collect actual text content from sibling/nearby text nodes in the same top-level frame.
+// Collect actual text content from the top-level page frame (the artboard/screen —
+// the direct child of the PAGE node) that contains the selected layer.
+// Walking to the PAGE child guarantees we read the whole screen regardless of
+// how deeply nested inside components the selected node is.
 // Sorted by spatial proximity to the selected node so the most relevant text comes first.
 function getNearbyTextContent(selectedNode, maxCount) {
   maxCount = maxCount || 10;
 
-  // Find the topmost FRAME ancestor — the whole screen/component
-  var container = null;
-  var p = selectedNode.parent;
-  while (p && p.type !== 'PAGE') {
-    if (p.type === 'FRAME') container = p;
-    p = p.parent;
+  // Walk up until the parent is PAGE — that node is the top-level artboard/screen.
+  var container = selectedNode;
+  while (container.parent && container.parent.type !== 'PAGE') {
+    container = container.parent;
   }
-  // Fall back to immediate parent if no frame exists above
-  if (!container) container = selectedNode.parent;
+  // If the node itself is a direct PAGE child, use it; otherwise fall back to
+  // immediate parent (handles edge cases like nodes placed directly on the canvas).
   if (!container || container.type === 'PAGE') return [];
 
   // Depth-first collect all visible TEXT nodes (skip the selected one)
