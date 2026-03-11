@@ -44,7 +44,7 @@ function getAncestorInfo(node) {
 // how deeply nested inside components the selected node is.
 // Sorted by spatial proximity to the selected node so the most relevant text comes first.
 function getNearbyTextContent(selectedNode, maxCount) {
-  maxCount = maxCount || 10;
+  maxCount = maxCount || 15;
 
   // Walk up until the parent is PAGE — that node is the top-level artboard/screen.
   var container = selectedNode;
@@ -55,9 +55,16 @@ function getNearbyTextContent(selectedNode, maxCount) {
   // immediate parent (handles edge cases like nodes placed directly on the canvas).
   if (!container || container.type === 'PAGE') return [];
 
-  // Depth-first collect all visible TEXT nodes (skip the selected one)
+  // Depth-first collect visible TEXT nodes (skip the selected one).
+  // Hard limits: stop after visiting 200 nodes or collecting 15 text strings
+  // to prevent freezing on large artboards with thousands of nodes.
   var candidates = [];
+  var visited = 0;
+  var MAX_NODES = 200;
+  var MAX_TEXT  = 15;
   function collect(node) {
+    if (visited >= MAX_NODES || candidates.length >= MAX_TEXT) return;
+    visited++;
     if (node === selectedNode) return;
     if (node.visible === false) return;
     if (node.type === 'TEXT') {
@@ -65,7 +72,10 @@ function getNearbyTextContent(selectedNode, maxCount) {
       if (text) candidates.push({ text: text, node: node });
     }
     if ('children' in node) {
-      for (var i = 0; i < node.children.length; i++) collect(node.children[i]);
+      for (var i = 0; i < node.children.length; i++) {
+        if (visited >= MAX_NODES || candidates.length >= MAX_TEXT) break;
+        collect(node.children[i]);
+      }
     }
   }
   collect(container);
@@ -142,7 +152,7 @@ function sendSelection() {
     parentFrameName: info.parentFrameName,
     topFrameName: info.topFrameName,
     pageName: pageName,
-    nearbyText: getNearbyTextContent(node, 10),
+    nearbyText: getNearbyTextContent(node, 15),
   });
 }
 
