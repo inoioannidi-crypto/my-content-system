@@ -38,75 +38,42 @@ function getAncestorInfo(node) {
   };
 }
 
-// Collect actual text content from the top-level page frame (the artboard/screen —
-// the direct child of the PAGE node) that contains the selected layer.
-// Walking to the PAGE child guarantees we read the whole screen regardless of
-// how deeply nested inside components the selected node is.
-// Sorted by spatial proximity to the selected node so the most relevant text comes first.
+// Collect text from the selected node's direct siblings and the parent's direct
+// siblings — no deep traversal. Stays on at most two layers of children, so it
+// is O(siblings) not O(artboard) and cannot freeze Figma.
 function getNearbyTextContent(selectedNode, maxCount) {
-  maxCount = maxCount || 15;
+  maxCount = maxCount || 10;
 
-  // Walk up until the parent is PAGE — that node is the top-level artboard/screen.
-  var container = selectedNode;
-  while (container.parent && container.parent.type !== 'PAGE') {
-    container = container.parent;
-  }
-  // If the node itself is a direct PAGE child, use it; otherwise fall back to
-  // immediate parent (handles edge cases like nodes placed directly on the canvas).
-  if (!container || container.type === 'PAGE') return [];
+  var results = [];
+  var seen = {};
 
-  // Depth-first collect visible TEXT nodes (skip the selected one).
-  // Hard limits: stop after visiting 200 nodes or collecting 15 text strings
-  // to prevent freezing on large artboards with thousands of nodes.
-  var candidates = [];
-  var visited = 0;
-  var MAX_NODES = 200;
-  var MAX_TEXT  = 15;
-  function collect(node) {
-    if (visited >= MAX_NODES || candidates.length >= MAX_TEXT) return;
-    visited++;
+  function addText(node) {
+    if (results.length >= maxCount) return;
     if (node === selectedNode) return;
     if (node.visible === false) return;
     if (node.type === 'TEXT') {
-      var text = node.characters ? node.characters.trim() : '';
-      if (text) candidates.push({ text: text, node: node });
+      var t = node.characters ? node.characters.trim() : '';
+      if (t.length > 120) t = t.slice(0, 120) + '…';
+      if (t && !seen[t]) { seen[t] = true; results.push(t); }
     }
-    if ('children' in node) {
-      for (var i = 0; i < node.children.length; i++) {
-        if (visited >= MAX_NODES || candidates.length >= MAX_TEXT) break;
-        collect(node.children[i]);
-      }
-    }
-  }
-  collect(container);
-
-  // Sort by Euclidean distance from the selected node's centre
-  var selBox = selectedNode.absoluteBoundingBox;
-  if (selBox && candidates.length > 1) {
-    var cx = selBox.x + selBox.width / 2;
-    var cy = selBox.y + selBox.height / 2;
-    candidates.sort(function(a, b) {
-      var ab = a.node.absoluteBoundingBox || {};
-      var bb = b.node.absoluteBoundingBox || {};
-      var ad = Math.pow((ab.x || 0) + (ab.width || 0) / 2 - cx, 2)
-              + Math.pow((ab.y || 0) + (ab.height || 0) / 2 - cy, 2);
-      var bd = Math.pow((bb.x || 0) + (bb.width || 0) / 2 - cx, 2)
-              + Math.pow((bb.y || 0) + (bb.height || 0) / 2 - cy, 2);
-      return ad - bd;
-    });
   }
 
-  // Deduplicate and truncate each string; return up to maxCount
-  var seen = {};
-  var results = [];
-  for (var i = 0; i < candidates.length && results.length < maxCount; i++) {
-    var t = candidates[i].text;
-    if (t.length > 120) t = t.slice(0, 120) + '…';
-    if (!seen[t]) {
-      seen[t] = true;
-      results.push(t);
+  // Level 1: direct siblings (children of the immediate parent)
+  var parent = selectedNode.parent;
+  if (parent && parent.type !== 'PAGE' && 'children' in parent) {
+    for (var i = 0; i < parent.children.length && results.length < maxCount; i++) {
+      addText(parent.children[i]);
     }
   }
+
+  // Level 2: parent's siblings (children of the grandparent)
+  var grandparent = parent && parent.parent;
+  if (grandparent && grandparent.type !== 'PAGE' && 'children' in grandparent) {
+    for (var j = 0; j < grandparent.children.length && results.length < maxCount; j++) {
+      addText(grandparent.children[j]);
+    }
+  }
+
   return results;
 }
 
@@ -152,7 +119,7 @@ function sendSelection() {
     parentFrameName: info.parentFrameName,
     topFrameName: info.topFrameName,
     pageName: pageName,
-    nearbyText: getNearbyTextContent(node, 15),
+    nearbyText: getNearbyTextContent(node, 10),
   });
 }
 
