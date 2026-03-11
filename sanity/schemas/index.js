@@ -1,9 +1,7 @@
-const brandVoice = require('./brandVoice.js')
-const writingRule = require('./writingRule.js')
-const toneContext = require('./toneContext.js')
-const grammar = require('./grammar.js')
-const contentType = require('./contentType.js')
+import brandVoice from './brandVoice.js'
+import writingRule from './writingRule.js'
+import toneContext from './toneContext.js'
+import grammar from './grammar.js'
+import contentType from './contentType.js'
 
-module.exports = {
-  schemaTypes: [brandVoice, writingRule, toneContext, grammar, contentType],
-}
+export const schemaTypes = [brandVoice, writingRule, toneContext, grammar, contentType]

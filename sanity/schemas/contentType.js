@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   name: 'contentType',
   title: 'Content Type',
   type: 'document',

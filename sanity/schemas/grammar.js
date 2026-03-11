@@ -2,7 +2,7 @@ function stringArrayField(name, title, description) {
   return { name, title, description, type: 'array', of: [{ type: 'string' }] }
 }
 
-module.exports = {
+export default {
   name: 'grammar',
   title: 'Grammar & Style',
   type: 'document',
