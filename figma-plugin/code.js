@@ -120,6 +120,10 @@ function sendSelection() {
     topFrameName: info.topFrameName,
     pageName: pageName,
     nearbyText: getNearbyTextContent(node, 10),
+    fontSize: node.fontSize,
+    fontWeight: node.fontWeight,
+    charCount: node.characters.length,
+    textCase: node.textCase,
   });
 }
 

@@ -566,7 +566,7 @@
         // ── Auto-detect content type ──
         var prevAutoType = autoType;
         autoType = msg.hasSelection
-          ? inferContentType(msg.nodeName, msg.parentComponentName, msg.parentFrameName)
+          ? inferContentType(msg.nodeName, msg.parentComponentName, msg.parentFrameName, msg.fontSize, msg.fontWeight, msg.charCount)
           : '';
         var typeSelect = document.getElementById('gen-type');
         if (!typeUserEdited || typeSelect.value === prevAutoType || typeSelect.value === '') {
@@ -755,7 +755,7 @@
       { p: ['heading', 'title'], t: 'Page title / Heading', max: 1 },
     ];
 
-    function inferContentType(nodeName, componentName, frameName) {
+    function inferContentType(nodeName, componentName, frameName, fontSize, fontWeight, charCount) {
       var sources = [componentName, nodeName, frameName];
       for (var si = 0; si < sources.length; si++) {
         var src = (sources[si] || '').toLowerCase();
@@ -766,6 +766,14 @@
           if (rule.p.some(function(kw) { return src.includes(kw); })) return rule.t;
         }
       }
+      // Fallback: use visual/content signals when no keyword matched
+      var fs = typeof fontSize === 'number' ? fontSize : null;
+      var fw = typeof fontWeight === 'number' ? fontWeight : null;
+      var cc = typeof charCount === 'number' ? charCount : null;
+      if (fs !== null && fs >= 20) return 'Page title / Heading';
+      if (fs !== null && fs <= 11) return 'Helper text';
+      if (cc !== null && fw !== null && cc > 60 && fw <= 400) return 'Body text / Description';
+      if (cc !== null && fw !== null && cc < 30 && fw >= 600) return 'Form label';
       return '';
     }
 
