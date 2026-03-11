@@ -50,6 +50,18 @@ Generate exactly 3 variations. Return ONLY valid JSON — no markdown, no explan
   ]
 }`;
 
+// Returns true when the description is a generic auto-generated layer name
+// with no meaningful signal (e.g. "A label for the Label field in Output").
+const GENERIC_WORDS_RE = /\b(label|text|button|frame|input|field|node|layer|group|component|placeholder|icon|image|container|wrapper|section|header|footer|title|body|content|copy)\b/gi;
+
+function isGenericDescription(desc) {
+  if (!desc) return true;
+  const words = desc.trim().split(/\s+/);
+  // Strip all generic words and stop-words; if nothing meaningful remains, it's generic
+  const meaningful = desc.replace(GENERIC_WORDS_RE, '').replace(/\b(a|an|the|for|in|of|on|at|to|is|with)\b/gi, '').replace(/[^a-z0-9]/gi, ' ').trim();
+  return meaningful.length < 4;
+}
+
 function extractJSON(text) {
   const match = text.match(/\{[\s\S]*\}/);
   if (match) return match[0];
@@ -66,7 +78,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { contentType, description, context } = req.body || {};
+  const { contentType, description, context, nearbyText } = req.body || {};
 
   if (!contentType || !description) {
     return res.status(400).json({ error: 'contentType and description are required' });
@@ -78,10 +90,27 @@ module.exports = async function handler(req, res) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+  const genericDesc = isGenericDescription(description);
+
+  // Special guidance for form labels: make it explicit that we want the actual
+  // label text (e.g. "Job title"), not a description of a label.
+  const isFormLabel = /form.?label|label/i.test(contentType);
+
   const userMessage = [
     `Content type: ${contentType}`,
-    `Description: ${description}`,
+    genericDesc
+      ? `Description: (not useful — auto-generated layer name, ignore it and rely on the screen content and content type below)`
+      : `Description: ${description}`,
     context ? `Context/placement: ${context}` : null,
+    nearbyText?.length
+      ? `Screen content (the actual visible text on this screen — this is critical context that tells you what the screen is about; your generated copy must fit naturally alongside this): ${nearbyText.join(', ')}`
+      : null,
+    isFormLabel
+      ? `IMPORTANT: For a form label, generate the actual short label text that would appear above an input field (e.g. "Job title", "Email address", "Start date") — NOT the word "Label" or a description of a label.`
+      : null,
+    genericDesc && !nearbyText?.length
+      ? `No reliable description or screen content is available. Generate 3 plausible, on-brand variations for this content type based on common Workable UI patterns.`
+      : null,
   ].filter(Boolean).join('\n');
 
   try {

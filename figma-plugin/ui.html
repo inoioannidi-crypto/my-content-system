@@ -843,20 +843,12 @@
       setGenerateLoading(true);
       document.getElementById('gen-results').style.display = 'none';
 
-      // Append nearby screen text to context so Claude understands the real content of the screen
-      var fullContext = context;
-      if (autoNearbyText.length > 0) {
-        var nearbyStr = autoNearbyText.join(' · ');
-        fullContext = fullContext
-          ? fullContext + '\n\nNearby text on screen: ' + nearbyStr
-          : 'Nearby text on screen: ' + nearbyStr;
-      }
-
       parent.postMessage({ pluginMessage: {
         type: 'generate',
         contentType: contentType,
         description: description,
-        context: fullContext || undefined
+        context: context || undefined,
+        nearbyText: autoNearbyText.length > 0 ? autoNearbyText : undefined
       }}, '*');
     });
 

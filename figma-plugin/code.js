@@ -179,7 +179,8 @@ figma.ui.onmessage = async function(msg) {
       body: JSON.stringify({
         contentType: msg.contentType,
         description: msg.description,
-        context: msg.context
+        context: msg.context,
+        nearbyText: msg.nearbyText
       })
     })
     .then(function(res) {
