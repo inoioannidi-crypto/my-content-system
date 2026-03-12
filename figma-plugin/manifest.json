@@ -1,10 +1,11 @@
 {
   "name": "Content Generator",
-  "id": "content-generator-workable-001",
+  "id": "1613854974957792623",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
   "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
   "networkAccess": {
     "allowedDomains": [
       "https://my-content-system-o9l2.vercel.app"
