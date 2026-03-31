@@ -37,8 +37,9 @@ TONE BY CONTENT TYPE:
 - Email subject: Action-oriented. Sentence case. Under 50 characters.
 - Email body: Friendly, concise. One key message per paragraph.
 - Notification: Clear and direct. Say what happened and what to do next.
-- Page title/Heading: Sentence case. No period.
-- Modal title: Sentence case. No period. Matches the primary action.
+- Page title/Heading: Sentence case. No period. 2–5 words. Short heading alternative, not body copy.
+- Modal title: Sentence case. No period. 2–5 words. Matches the primary action.
+- Section title: Sentence case. No period. 1–3 words. Labels the content group beneath it.
 - Helper text: One sentence. Sentence case. Full stop.
 - Body text / Description: Short to medium informational or explanatory text that provides context, sets expectations, or describes a process. Conversational, clear, and concise. Full stop. 1–3 sentences max.
 
@@ -84,10 +85,10 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { contentType, description, context, nearbyText } = req.body || {};
+  const { contentType, description, context, nearbyText, selectedText, isHeading } = req.body || {};
 
-  if (!contentType || !description) {
-    return res.status(400).json({ error: 'contentType and description are required' });
+  if (!contentType || (!description && !selectedText && !nearbyText?.length)) {
+    return res.status(400).json({ error: 'contentType and at least one context signal are required' });
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -104,17 +105,35 @@ module.exports = async function handler(req, res) {
 
   const userMessage = [
     `Content type: ${contentType}`,
-    genericDesc
+
+    // ── Heading path ──
+    // When the selected layer is a heading, generate short alternative headings
+    // (not body copy). The current text and nearby screen copy are the main signals.
+    isHeading
+      ? [
+          `IMPORTANT: The selected layer is a HEADING. Generate 3 SHORT HEADING ALTERNATIVES (2–5 words, sentence case, no period) that could replace the current heading.`,
+          `Do NOT write body copy, full sentences, or descriptions — only short heading text.`,
+          `Each variation should be meaningfully different in phrasing or emphasis.`,
+          selectedText ? `Current heading: "${selectedText}"` : null,
+          nearbyText?.length
+            ? `Screen context (sibling layers — use this to make the heading specific and relevant): ${nearbyText.join(' · ')}`
+            : null,
+          context ? `Placement: ${context}` : null,
+        ].filter(Boolean).join('\n')
+      : null,
+
+    // ── Standard path ──
+    !isHeading && (genericDesc
       ? `Description: (not useful — auto-generated layer name, ignore it and rely on the screen content and content type below)`
-      : `Description: ${description}`,
-    context ? `Context/placement: ${context}` : null,
-    nearbyText?.length
+      : `Description: ${description}`),
+    !isHeading && context ? `Context/placement: ${context}` : null,
+    !isHeading && nearbyText?.length
       ? `Screen content (the actual visible text on this screen — this is critical context that tells you what the screen is about; your generated copy must fit naturally alongside this): ${nearbyText.join(', ')}`
       : null,
-    isFormLabel
+    !isHeading && isFormLabel
       ? `IMPORTANT: For a form label, generate the actual short label text that would appear above an input field (e.g. "Job title", "Email address", "Start date") — NOT the word "Label" or a description of a label.`
       : null,
-    genericDesc && !nearbyText?.length
+    !isHeading && genericDesc && !nearbyText?.length
       ? `No reliable description or screen content is available. Generate 3 plausible, on-brand variations for this content type based on common Workable UI patterns.`
       : null,
   ].filter(Boolean).join('\n');

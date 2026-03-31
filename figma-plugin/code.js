@@ -162,7 +162,9 @@ figma.ui.onmessage = async function(msg) {
         contentType: msg.contentType,
         description: msg.description,
         context: msg.context,
-        nearbyText: msg.nearbyText
+        nearbyText: msg.nearbyText,
+        selectedText: msg.selectedText,
+        isHeading: msg.isHeading,
       })
     })
     .then(function(res) {

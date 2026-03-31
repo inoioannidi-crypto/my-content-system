@@ -167,5 +167,9 @@ module.exports = {
     { type: 'Page title / Heading', rules: ['Sentence case. No period.'] },
     { type: 'Modal title', rules: ['Sentence case. No period.', 'Matches the primary action'] },
     { type: 'Helper text', rules: ['One sentence', 'Sentence case. Full stop.'] },
+    { type: 'Confirmation text', rules: ['1–3 words, past tense (Saved, Sent, Deleted permanently)', 'Appears briefly after an action completes', 'Offer undo when the action is reversible'] },
+    { type: 'Section title', rules: ['Noun or short noun phrase', 'Sentence case. No period.', 'Under 3 words — must describe all content beneath it'] },
+    { type: 'Text link', rules: ['Descriptive — tell the user what they\'ll find', 'Never use "click here" or "tap here"', 'No full stop inside the link'] },
+    { type: 'Loading / transitional text', rules: ['Present continuous verb (-ing): Loading…, Generating…', '1–2 words for quick actions; more descriptive for long processes', 'Followed by automatic confirmation when complete'] },
   ],
 };

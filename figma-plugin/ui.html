@@ -406,6 +406,7 @@
           <option value="Error message">Error message</option>
           <option value="Success message">Success message</option>
           <option value="Flash message">Flash message</option>
+          <option value="Confirmation text">Confirmation text</option>
           <option value="Onboarding copy">Onboarding copy</option>
           <option value="Empty state">Empty state</option>
           <option value="Form label">Form label</option>
@@ -415,16 +416,19 @@
           <option value="Email body">Email body</option>
           <option value="Notification">Notification</option>
           <option value="Page title / Heading">Page title / Heading</option>
+          <option value="Section title">Section title</option>
           <option value="Modal title">Modal title</option>
           <option value="Helper text">Helper text</option>
+          <option value="Text link">Text link</option>
           <option value="Body text / Description">Body text / Description</option>
+          <option value="Loading / transitional text">Loading / transitional text</option>
         </select>
         <div id="type-hint" class="context-hint" style="display:none">✦ Auto-detected from layer</div>
       </div>
 
       <div class="field">
         <div class="context-field-header">
-          <label for="gen-description" style="margin-bottom:0">Describe what you need</label>
+          <label for="gen-description" id="desc-label" style="margin-bottom:0">Describe what you need</label>
           <button id="desc-reset" class="btn-reset" style="display:none">Reset to auto-suggested</button>
         </div>
         <textarea id="gen-description" rows="3" placeholder="e.g. A button to submit a job application form"></textarea>
@@ -476,6 +480,7 @@
           <option value="Error message">Error message</option>
           <option value="Success message">Success message</option>
           <option value="Flash message">Flash message</option>
+          <option value="Confirmation text">Confirmation text</option>
           <option value="Onboarding copy">Onboarding copy</option>
           <option value="Empty state">Empty state</option>
           <option value="Form label">Form label</option>
@@ -485,9 +490,12 @@
           <option value="Email body">Email body</option>
           <option value="Notification">Notification</option>
           <option value="Page title / Heading">Page title / Heading</option>
+          <option value="Section title">Section title</option>
           <option value="Modal title">Modal title</option>
           <option value="Helper text">Helper text</option>
+          <option value="Text link">Text link</option>
           <option value="Body text / Description">Body text / Description</option>
+          <option value="Loading / transitional text">Loading / transitional text</option>
         </select>
       </div>
 
@@ -529,6 +537,10 @@
     let autoDescription = '';     // last auto-suggested description string
     let descriptionUserEdited = false; // true when user has manually changed the description
     let autoNearbyText = [];      // nearby text strings collected from surrounding layers
+    let selectionNodeName = null;
+    let selectionFontSize = null;
+    let selectionFontWeight = null;
+    let selectionCharCount = null;
 
     // ── Tab switching ──
     document.querySelectorAll('.tab').forEach(function(tab) {
@@ -553,6 +565,12 @@
         // ── Nearby text ──
         autoNearbyText = msg.nearbyText || [];
 
+        // ── Raw node signals (used for heading detection at generate time) ──
+        selectionNodeName  = msg.hasSelection ? (msg.nodeName   || null) : null;
+        selectionFontSize  = msg.hasSelection ? (msg.fontSize   || null) : null;
+        selectionFontWeight = msg.hasSelection ? (msg.fontWeight || null) : null;
+        selectionCharCount = msg.hasSelection ? (msg.charCount  || null) : null;
+
         // ── Auto-fill context ──
         var prevAutoContext = autoContext;
         autoContext = msg.autoContext || '';
@@ -566,7 +584,7 @@
         // ── Auto-detect content type ──
         var prevAutoType = autoType;
         autoType = msg.hasSelection
-          ? inferContentType(msg.nodeName, msg.parentComponentName, msg.parentFrameName, msg.fontSize, msg.fontWeight, msg.charCount)
+          ? inferContentType(msg.nodeName, msg.parentComponentName, msg.parentFrameName, msg.fontSize, msg.fontWeight, msg.charCount, msg.text, msg.nearbyText)
           : '';
         var typeSelect = document.getElementById('gen-type');
         if (!typeUserEdited || typeSelect.value === prevAutoType || typeSelect.value === '') {
@@ -709,9 +727,15 @@
       var el = document.getElementById('gen-description');
       var hint = document.getElementById('desc-hint');
       var resetBtn = document.getElementById('desc-reset');
+      var label = document.getElementById('desc-label');
       var isAuto = !descriptionUserEdited && autoDescription !== '' && el.value.trim() === autoDescription.trim();
       hint.style.display = isAuto ? 'block' : 'none';
       resetBtn.style.display = (descriptionUserEdited && autoDescription !== '') ? 'inline' : 'none';
+      if (label) {
+        label.textContent = hasSelection
+          ? 'Describe what you need \u00a0\u2014\u00a0 optional when layer is selected'
+          : 'Describe what you need';
+      }
     }
 
     document.getElementById('gen-description').addEventListener('input', function() {
@@ -736,18 +760,23 @@
       { p: ['modal title', 'dialog title'],                                t: 'Modal title' },
       { p: ['error message', 'validation error', 'field error', 'error text', 'alert danger', 'alert-danger'], t: 'Error message' },
       { p: ['success message', 'alert success', 'alert-success'],          t: 'Success message' },
+      { p: ['confirmation text', 'post-action toast', 'action confirmation', 'confirm state'], t: 'Confirmation text' },
       { p: ['flash message', 'toast', 'snackbar'],                         t: 'Flash message' },
       { p: ['push notification'],                                          t: 'Notification' },
       { p: ['onboarding', 'welcome screen', 'setup wizard'],               t: 'Onboarding copy' },
       { p: ['placeholder text', 'placeholder'],                            t: 'Placeholder text' },
       { p: ['tooltip'],                                                     t: 'Tooltip' },
+      { p: ['section title', 'section name', 'group title', 'panel title', 'subsection title'], t: 'Section title' },
       { p: ['page title', 'screen title', 'section heading'],              t: 'Page title / Heading' },
       { p: ['helper text', 'supporting text', 'hint text'],                t: 'Helper text' },
+      { p: ['text link', 'link text', 'hyperlink', 'anchor text'],         t: 'Text link' },
+      { p: ['loading text', 'loading state', 'transitional text', 'progress label', 'skeleton label'], t: 'Loading / transitional text' },
       { p: ['form label', 'field label', 'input label'],                   t: 'Form label' },
       { p: ['button', 'btn', 'cta'],                                       t: 'Button / CTA' },
       { p: ['notification'],                                               t: 'Notification' },
       { p: ['modal', 'dialog'],                                            t: 'Modal title' },
       { p: ['flash'],                                                      t: 'Flash message' },
+      { p: ['loading'],                                                    t: 'Loading / transitional text', max: 1 },
       { p: ['body', 'description', 'paragraph', 'output', 'question', 'supporting', 'subtext', 'caption', 'detail'], t: 'Body text / Description', max: 1 },
       // Broader single-word patterns — only matched on component or node name, not frame name
       { p: ['error'],    t: 'Error message',          max: 1 },
@@ -755,7 +784,119 @@
       { p: ['heading', 'title'], t: 'Page title / Heading', max: 1 },
     ];
 
-    function inferContentType(nodeName, componentName, frameName, fontSize, fontWeight, charCount) {
+    // Semantic pre-pass rules: checked across ALL sources combined before the
+    // positional TYPE_RULES sweep. This prevents generic node names like "Heading"
+    // or "Title" from winning over meaningful context in the component or frame name
+    // (e.g. a "Heading" layer inside a "No access modal" should be Error message).
+    // Warning/caution states are intentionally mapped to Error message — the copy
+    // rules are identical and we don't maintain a separate Warning type.
+    var SEMANTIC_RULES = [
+      { p: ['permission denied', 'no permission', 'no access', 'access denied',
+             'access restricted', 'insufficient permission', 'unauthorized',
+             'not authorized', 'restricted access'],                              t: 'Error message' },
+      { p: ['warning state', 'warning modal', 'warning dialog', 'warning message',
+             'caution modal', 'destructive action', 'irreversible', 'danger zone',
+             'confirm delete', 'confirm removal', 'confirm cancel'],              t: 'Error message' },
+      { p: ['no results', 'no items', 'nothing here', 'nothing yet',
+             'no data yet', 'get started', 'first job', 'first candidate',
+             'add your first'],                                                    t: 'Empty state' },
+    ];
+
+    // Text content rules: patterns matched against the actual copy text of the selected
+    // layer (and, for contextual types, nearby text). Multi-word phrases are preferred
+    // to keep false-positive rate low.
+    var TEXT_RULES = [
+      // ── Error / permission / warning ──
+      // Short direct headings like "Permission required", "No access", "Access denied"
+      { p: ["permission required", "permission needed", "permission denied",
+            "access required", "access denied", "access restricted",
+            "access revoked", "no access",
+            "not authorized", "unauthorized access",
+            "login required", "sign in required",
+            "upgrade required", "upgrade your plan",
+            "something went wrong", "an error occurred", "error occurred"],
+        t: 'Error message' },
+      // Longer sentence patterns like "You no longer have access to this feature"
+      { p: ["don't have permission", "do not have permission",
+            "no longer have access", "you don't have access",
+            "you no longer have", "necessary permissions",
+            "doesn't have permission", "access has been revoked",
+            "not authorized to", "unauthorized to",
+            "went wrong", "failed to load", "failed to save",
+            "unable to load", "unable to complete",
+            "couldn't load", "couldn't complete",
+            "try again later", "please try again",
+            "contact your admin", "contact support",
+            "error has occurred",
+            "session has expired", "session expired",
+            "invalid email", "invalid password", "incorrect password"],
+        t: 'Error message' },
+      // ── Empty state ──
+      { p: ["nothing here yet", "nothing to show yet", "nothing here",
+            "no results found", "no candidates yet", "no jobs yet",
+            "no reports yet", "no members yet",
+            "get started by", "add your first", "create your first",
+            "invite your first", "post your first",
+            "start by adding", "start by creating",
+            "looks like you haven't", "you haven't added", "you haven't created"],
+        t: 'Empty state' },
+      // ── Loading / transitional ──
+      { p: ["loading", "please wait", "just a moment",
+            "hang tight", "this may take", "fetching your"],
+        t: 'Loading / transitional text' },
+      // ── Onboarding ──
+      { p: ["welcome to workable", "welcome to your", "welcome! let",
+            "let's get started", "let's set up your",
+            "get started with workable", "your first step",
+            "set up your account", "set up your workspace"],
+        t: 'Onboarding copy' },
+      // ── Notification ──
+      { p: ["has applied for", "mentioned you in", "left a comment on",
+            "sent you a message", "new application for", "new message from",
+            "you have a new"],
+        t: 'Notification' },
+    ];
+
+    // Subset of TEXT_RULES used for nearby-text context: only types where broader
+    // context reliably indicates the type regardless of the selected node's own text.
+    // Excludes Loading/Onboarding/Notification to avoid false positives.
+    var NEARBY_CONTEXT_RULES = [
+      TEXT_RULES[0], // Error message
+      TEXT_RULES[1], // Empty state
+    ];
+
+    function inferContentType(nodeName, componentName, frameName, fontSize, fontWeight, charCount, nodeText, nearbyTexts) {
+      // Pass 1 — Semantic name scan: all three name sources combined.
+      // Catches well-named components/frames (e.g. "No access modal", "Warning dialog").
+      var allNames = [(componentName || ''), (nodeName || ''), (frameName || '')]
+        .join(' ').toLowerCase();
+      for (var ci = 0; ci < SEMANTIC_RULES.length; ci++) {
+        var sr = SEMANTIC_RULES[ci];
+        if (sr.p.some(function(kw) { return allNames.includes(kw); })) return sr.t;
+      }
+
+      // Pass 2a — Node text: match any TEXT_RULE against the selected layer's own copy.
+      // This is the primary path for layers with generic names ("Title", "Frame 123").
+      var nt = (nodeText || '').toLowerCase();
+      if (nt.length > 0) {
+        for (var ti = 0; ti < TEXT_RULES.length; ti++) {
+          var tr = TEXT_RULES[ti];
+          if (tr.p.some(function(kw) { return nt.includes(kw); })) return tr.t;
+        }
+      }
+
+      // Pass 2b — Nearby text context: use surrounding copy to infer error/empty-state
+      // context. Limited to contextual types only so a nearby "Try again" button or
+      // "Loading…" sibling doesn't misclassify the selected heading.
+      var nearby = (nearbyTexts || []).slice(0, 5).join(' ').toLowerCase();
+      if (nearby.length > 0) {
+        for (var nci = 0; nci < NEARBY_CONTEXT_RULES.length; nci++) {
+          var ncr = NEARBY_CONTEXT_RULES[nci];
+          if (ncr.p.some(function(kw) { return nearby.includes(kw); })) return ncr.t;
+        }
+      }
+
+      // Pass 3 — Positional name sweep: check each source in priority order (component → node → frame).
       var sources = [componentName, nodeName, frameName];
       for (var si = 0; si < sources.length; si++) {
         var src = (sources[si] || '').toLowerCase();
@@ -828,11 +969,40 @@
           return layer && where ? 'Helper text for ' + layer + ' in ' + where
                : where          ? 'Helper text in ' + where
                :                  'Helper text';
+        case 'Confirmation text':
+          return where ? 'A post-action confirmation in ' + where : 'A post-action confirmation';
+        case 'Section title':
+          return where ? 'A section title in ' + where : 'A section title';
+        case 'Text link':
+          return layer && where ? 'A text link for ' + layer + ' in ' + where
+               : where          ? 'A text link in ' + where
+               :                  'A text link';
+        case 'Loading / transitional text':
+          return where ? 'A loading message in ' + where : 'A loading message';
         default:
           return display && where ? '"' + display + '" in ' + where
                : where            ? 'Copy for ' + where
                :                   '';
       }
+    }
+
+    // ── Heading detection ──
+    // Content types where we always want short heading alternatives, not body copy.
+    var HEADING_CONTENT_TYPES = ['Page title / Heading', 'Modal title', 'Section title'];
+
+    function isHeadingElement(nodeName, contentType, fontSize, fontWeight, charCount) {
+      // Explicit heading content types always generate heading alternatives
+      if (HEADING_CONTENT_TYPES.indexOf(contentType) !== -1) return true;
+      // Layer name contains a heading keyword (e.g. "Heading", "Title", "Header")
+      var name = (nodeName || '').toLowerCase();
+      if (/\b(heading|headline|title|header)\b/.test(name)) return true;
+      // Visual signals: large font with short text, or bold with very short text
+      var fs = typeof fontSize === 'number'  ? fontSize  : null;
+      var fw = typeof fontWeight === 'number' ? fontWeight : null;
+      var cc = typeof charCount === 'number'  ? charCount  : null;
+      if (fs !== null && fs >= 16 && cc !== null && cc <= 80) return true;
+      if (fw !== null && fw >= 600 && cc !== null && cc <= 50) return true;
+      return false;
     }
 
     // ── Generate ──
@@ -845,8 +1015,8 @@
         showError('gen-error', 'Choose a content type first.');
         return;
       }
-      if (!description) {
-        showError('gen-error', 'Add a description of what you need.');
+      if (!description && !hasSelection) {
+        showError('gen-error', 'Select a text layer or describe what you need.');
         return;
       }
 
@@ -854,12 +1024,16 @@
       setGenerateLoading(true);
       document.getElementById('gen-results').style.display = 'none';
 
+      var isHeading = hasSelection && isHeadingElement(selectionNodeName, contentType, selectionFontSize, selectionFontWeight, selectionCharCount);
+
       parent.postMessage({ pluginMessage: {
         type: 'generate',
         contentType: contentType,
         description: description,
         context: context || undefined,
-        nearbyText: autoNearbyText.length > 0 ? autoNearbyText : undefined
+        nearbyText: autoNearbyText.length > 0 ? autoNearbyText : undefined,
+        selectedText: (hasSelection && selectedText) ? selectedText : undefined,
+        isHeading: isHeading || undefined,
       }}, '*');
     });
 
